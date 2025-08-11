@@ -1,24 +1,27 @@
+```
 +==============================================================+
 |                                                              |
 |                  BANSAL TIMBER & PLYWOOD                     |
 |                                                              |
 +==============================================================+
 
+```
+
 ## Bansal Timber & Plywood Website
 
-A professional, responsive website built for Bansal Timber & Plywood to showcase products, services, and brand identity.  
+A professional, responsive website built for **Bansal Timber & Plywood** to showcase products, services, and brand identity.  
 This project provides a clean, mobile-friendly storefront and includes an Admin Panel for managing blog content (create / edit / delete) to improve SEO and make content updates simple for the client.
 
 ## 🏢 Project by
-Purple Grail — Digital solutions that stand out.  
-Solo Developer: Ajay Kumar
+**Purple Grail** — Digital solutions that stand out.  
+**Solo Developer**: Ajay Kumar
 
 ## 🛠️ Tech Stack & Tools
-- React (Vite) — fast dev server and build tooling  
-- JavaScript (ES6+) — app logic and interactivity  
-- Tailwind CSS — utility-first styling and layout  
-- HTML5 — semantic markup  
-- NeoVim — development editor
+- **React (Vite)** — fast dev server and build tooling  
+- **JavaScript (ES6+)** — app logic and interactivity  
+- **Tailwind CSS — utility**-first styling and layout  
+- **HTML5** — semantic markup  
+- **NeoVim** — development editor
 
 ## Features
 - Responsive, mobile-first UI  
@@ -41,4 +44,4 @@ Made with dedication & love.
 
 ## Remarks
 
--- Ajay Kumar: I learned from this project, especially the backed aspect of the admin panel and the database required for it. My code is not the perfect but I think I did a good job overall. Would love to work on the project again if the client would like to expand the project with more features of expansions.
+-- **Ajay Kumar**: I learned from this project, especially the backed aspect of the admin panel and the database required for it. My code is not the perfect but I think I did a good job overall. Would love to work on the project again if the client would like to expand the project with more features of expansions.
