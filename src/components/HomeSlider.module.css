@@ -1,0 +1,32 @@
+/* AutoSlider.module.css*/
+
+@keyframes snapSlideIn {
+  0% {transform: transformX(100%); }
+  70% {transform: transformX(-10px);}
+  80% {transform: transformX(0);}
+  100% {transform: transformX(0);}
+}
+
+
+.animateSnapSlide {
+  animate: SnapalideIn 1s ease-out;
+  will-change: transform;
+}
+
+
+.frame {
+  position: relative;
+  overflow:hidden;
+}
+
+.layer {
+  postion: absolute;
+  inset:0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .animateSnapSlide {animation:none;}
+}
