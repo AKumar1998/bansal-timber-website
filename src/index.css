@@ -1,1 +1,8 @@
-@import 'tailwindcss'
+@import 'tailwindcss';
+
+@font-face {  
+  font-family: "SagaceMedium";  
+  font-style: normal;
+  font-weight: 500;
+  src: url("./assets/fonts/TRIALSagace-Medium-BF678f1fab0c8f7.otf") format("opentype");
+}
