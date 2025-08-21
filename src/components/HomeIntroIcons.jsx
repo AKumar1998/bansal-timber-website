@@ -4,7 +4,7 @@ import WhiteRoundedButton from './Buttons/WhiteRoundedButton.jsx'
 export default function HomeIntroIcons(){
 
   return (
-    <div>
+    <div className="bg-[#6B1900]">
       <div>
         <p className="text-white">Discover our full product line</p>
         <WhiteRoundedButton/>

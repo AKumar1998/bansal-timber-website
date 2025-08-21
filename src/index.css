@@ -4,5 +4,88 @@
   font-family: "SagaceMedium";  
   font-style: normal;
   font-weight: 500;
-  src: url("./assets/fonts/TRIALSagace-Medium-BF678f1fab0c8f7.otf") format("opentype");
+  src: url("./assets/fonts/sagace/sagace-medium.woff2") format("woff2");
+}
+
+@font-face {  
+  font-family: "SagaceMediumItalic";  
+  font-style: normal;
+  font-weight: 500;
+  src: url("./assets/fonts/sagace/sagace-medium-italic.woff2") format("woff2");
+}
+
+@font-face {  
+  font-family: "SagaceRegular";  
+  font-style: normal;
+  font-weight: 400;
+  src: url("./assets/fonts/sagace/sagace-regular.woff2") format("woff2");
+}
+
+@font-face {  
+  font-family: "SagaceRegularItalic";  
+  font-style: normal;
+  font-weight: 400;
+  src: url("./assets/fonts/sagace/sagace-regular-italic.woff2") format("woff2");
+}
+
+@font-face {  
+  font-family: "SagaceBold";  
+  font-style: normal;
+  font-weight: 700;
+  src: url("./assets/fonts/sagace/sagace-bold.woff2") format("woff2");
+}
+
+@font-face {  
+  font-family: "SagaceBoldItalic";  
+  font-style: normal;
+  font-weight: 700;
+  src: url("./assets/fonts/sagace/sagace-bold-italic.woff2") format("woff2");
+}
+@font-face {  
+  font-family: "SagaceLight";  
+  font-style: normal;
+  font-weight: 200;
+  src: url("./assets/fonts/sagace/sagace-light.woff2") format("woff2");
+}
+
+@font-face {  
+  font-family: "SagaceLightItalic";  
+  font-style: normal;
+  font-weight: 200;
+  src: url("./assets/fonts/sagace/sagace-light-italic.woff2") format("woff2");
+}
+
+@font-face {  
+  font-family: "SagaceBlack";  
+  font-style: normal;
+  font-weight: 900;
+  src: url("./assets/fonts/sagace/sagace-black.woff2") format("woff2");
+}
+
+@font-face {  
+  font-family: "SagaceBlackItalic";  
+  font-style: normal;
+  font-weight: 900;
+  src: url("./assets/fonts/sagace/sagace-black-italic.woff2") format("woff2");
+}
+
+@font-face {  
+  font-family: "NeueHaasRoman";  
+  font-style: normal;
+  font-weight: 400;
+  src: url("./assets/fonts/neue-haas-grotesk/neue-haas-roman-400.woff2") format("woff2");
+}
+
+@font-face {  
+  font-family: "NeueHaasMedium";  
+  font-style: normal;
+  font-weight: 500;
+  src: url("./assets/fonts/neue-haas-grotesk/neue-haas-medium-500.woff2") format("woff2");
+}
+
+@font-face {  
+  font-family: "NeueHaasBold";  
+  font-style: normal;
+  font-weight: 700;
+  src: url("./assets/fonts/neue-haas-grotesk/neue-haas-bold-700.woff2") format("woff2");
 }
