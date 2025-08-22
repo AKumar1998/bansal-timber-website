@@ -3,8 +3,9 @@ import Header from '.././components/Header.jsx';
 import HeroMain from '.././components/HeroMain.jsx';
 import HomeSlider from '.././components/HomeSlider.jsx';
 import HomeIntroSection from '../components/HomeIntroSection.jsx';
-import HomeIntroProducts from '../components/HomeIntroProducts';
+import HomeIntroProducts from '../components/HomeIntroProducts.jsx';
 import WhyChooseUs from '../components/WhyChooseUs.jsx';
+import HomeProductsArea from '../components/Containers/HomeProductsArea.jsx';
 
 
 function Home(){
@@ -17,6 +18,7 @@ function Home(){
         <HomeIntroSection/>
         <HomeIntroProducts/>
         <WhyChooseUs/>
+        <HomeProductsArea/>
       </MainContainer>
     </div>
   )
