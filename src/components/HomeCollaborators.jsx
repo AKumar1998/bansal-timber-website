@@ -1,7 +1,7 @@
 export default function HomeCollaborators({logos}) {
 
   return (
-    <div className="text-center mb-25 mt-25">
+    <div className="text-center mb-18 mt-25">
       <h2 className="font-[SagaceRegular] text-xl mb-10 text-black">
         Our collaborations with the best
       </h2>

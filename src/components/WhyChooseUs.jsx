@@ -1,6 +1,7 @@
 import woodInOut from '../assets/images/wood-in-out.jpg';
 import qualityLeaves from '../assets/images/quality-leaves.jpg';
 import fastFairPrice from '../assets/images/fast-fair-price.jpg';
+import SectionTitle from './SectionTitle.jsx';
 
 const Section = ({title, text, image, reverse}) => {
 
@@ -50,10 +51,9 @@ export default function WhyChooseUs(){
 
   return(
     <div>
-      <div className="text-center mt-6">
-        <h1 className="font-[NeueHaasRoman] text-xl md:text-[28px]">WHY CHOOSE US</h1>
-        <hr className="border-1 border-gray-500 mx-auto my-4"/>
-      </div>
+      <SectionTitle
+        title="WHY CHOOSE US"
+      />
       <div className="mx-auto">
         {sections.map((section) => (
           <Section key={sections.id} {...section}/>

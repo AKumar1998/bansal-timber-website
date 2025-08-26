@@ -3,7 +3,7 @@ export default function SimpleButton({ text, bgColor = "bg-[#FF5724]", textColor
   return (
     <button
       className={`
-        px-7 py-3 rounded-full font-[NeueHaasMedium]
+        px-10 py-3 rounded-full font-[NeueHaasMedium]
         transiltion-colors duration-300
         ${bgColor} ${textColor}
         hover:bg-black hover:text-white
