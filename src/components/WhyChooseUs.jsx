@@ -3,63 +3,54 @@ import qualityLeaves from '../assets/images/quality-leaves.jpg';
 import fastFairPrice from '../assets/images/fast-fair-price.jpg';
 import SectionTitle from './SectionTitle.jsx';
 
-const Section = ({title, text, image, reverse}) => {
-
-  return(
-  
+const Section = ({ title, text, image, reverse }) => {
+  return (
     <div className="flex flex-col md:flex-row items-center gap-8 my-12">
       <div className={`flex-1 ${reverse ? "md:order-2" : "md:order-1"}`}>
-        <img src={image} alt={text} className="w-full"/>
+        <img src={image} alt={title} className="w-full" />
       </div>
-      <div className={`flex-1 ${reverse? "md:order-1" : "md:order-2"}`}>
+      <div className={`flex-1 ${reverse ? "md:order-1" : "md:order-2"}`}>
         <h2 className="text-4xl text-black font-[NeueHaasBold]">{title}</h2>
         <p className="text-base mt-4 text-black font-[NeueHaasRoman]">{text}</p>
       </div>
     </div>
-  
   );
 };
 
 const sections = [
-  
   {
-    Id: 1, 
+    Id: 1,
     title: "We Know Wood, Inside Out",
     text: "Years of experience help us guide you to the right product every time. Speak with experts, not salespeople.",
     image: woodInOut,
     reverse: false
   },
   {
-    Id: 2, 
+    Id: 2,
     title: "Only Quality Leaves Our Store",
     text: "No substandard stock, no fakes. Just genuine, high-performance materials. Products we’d use in our own homes.",
     image: qualityLeaves,
     reverse: true
   },
   {
-    Id: 3, 
+    Id: 3,
     title: "Fast Service, Fair Prices",
     text: "Expect on-time delivery, honest rates, and smooth support. Transparent pricing, no last-minute surprises.",
     image: fastFairPrice,
     reverse: false
   }
-  
 ];
 
-
-export default function WhyChooseUs(){
-
-  return(
+export default function WhyChooseUs() {
+  return (
     <div>
-      <SectionTitle
-        title="WHY CHOOSE US"
-      />
+      <SectionTitle title="WHY CHOOSE US" />
       <div className="mx-auto">
         {sections.map((section) => (
-          <Section key={sections.id} {...section}/>
+          <Section key={section.Id} {...section} />
         ))}
       </div>
     </div>
   );
+}
 
-};

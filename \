@@ -1,0 +1,120 @@
+import { useState, useEffect } from "react";
+import logoBlack from './../assets/images/banal_logo_full.png';
+import logoWhite from './../assets/images/bansal_logo_full_white.png';
+import hamburgerBlack from '../assets/images/icons/hamburger-black.svg';
+import crossWhite from '../assets/images/icons/cross-white.svg';
+import homeBlack from '../assets/images/icons/home-black.svg';
+import homeWhite from '../assets/images/icons/home-white.svg';
+import productsBlack from '../assets/images/icons/products-black.svg';
+import productsWhite from '../assets/images/icons/products-white.svg';
+import aboutBlack from '../assets/images/icons/about-black.svg';
+import aboutWhite from '../assets/images/icons/about-white.svg';
+import blogsBlack from '../assets/images/icons/blogs-black.svg';
+import blogsWhite from '../assets/images/icons/blogs-white.svg';
+import contactBlack from '../assets/images/icons/contact-black.svg';
+import contactWhite from '../assets/images/icons/contact-white.svg';
+
+export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [showNavbar, setShowNavbar] = useState(true);
+  const [lastScroll, setLastScroll] = useState(0);
+
+  const navItems = [
+    { name: "Home", href: "/", iconBlack: homeBlack, iconWhite: homeWhite },
+    { name: "Products", href: "/products", iconBlack: productsBlack, iconWhite: productsWhite },
+    { name: "About Us", href: "/about", iconBlack: aboutBlack, iconWhite: aboutWhite },
+    { name: "Blogs", href: "/blogs", iconBlack: blogsBlack, iconWhite: blogsWhite },
+    { name: "Contact Us", href: "/contact", iconBlack: contactBlack, iconWhite: contactWhite },
+  ];
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScroll = window.scrollY;
+      if (currentScroll <= 100) {
+        setShowNavbar(true); // always show at hero
+      } else if (currentScroll > lastScroll) {
+        setShowNavbar(false); // scrolling down → hide
+      } else {
+        setShowNavbar(true); // scrolling up → show
+      }
+      setLastScroll(currentScroll);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScroll]);
+
+  return (
+    <header
+      className={`fixed top-0 left-0 w-full z-50 transition-transform duration-500 ${
+        showNavbar ? "translate-y-0" : "-translate-y-full"
+      }`}
+    >
+      <nav className="group relative flex items-center justify-between px-6 py-4 bg-black md:bg-black rounded-md mx-4 md:mx-auto max-w-7xl transition-colors duration-300 hover:bg-white">
+        {/* Logo */}
+        <a href="/" className="z-50">
+          <img
+            src={isOpen ? logoBlack : logoWhite} // swap logo based on mobile menu state
+            alt="Logo"
+            className="h-10"
+          />
+        </a>
+
+        {/* Desktop Menu */}
+        <div className="hidden md:flex gap-6">
+          {navItems.map((item) => (
+            <a
+              key={item.name}
+              href={item.href}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-300 group-hover:bg-black hover:bg-black"
+            >
+              <img
+                src={item.iconBlack}
+                alt={item.name}
+                className="h-5 w-5 group-hover:hidden"
+              />
+              <img
+                src={item.iconWhite}
+                alt={item.name}
+                className="h-5 w-5 hidden group-hover:block"
+              />
+              <span className="text-white group-hover:text-white hover:text-white">{item.name}</span>
+            </a>
+          ))}
+        </div>
+
+        {/* Mobile Hamburger / Cross */}
+        <button
+          className="md:hidden w-10 h-10 flex items-center justify-center rounded-lg transition"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <img
+            src={isOpen ? crossWhite : hamburgerBlack}
+            alt="menu"
+            className="w-6 h-6"
+          />
+        </button>
+      </nav>
+
+      {/* Mobile Menu */}
+      <div
+        className={`fixed top-0 right-0 h-screen w-full bg-white flex flex-col items-center justify-center gap-6 transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {navItems.map((item) => (
+          <a
+            key={item.name}
+            href={item.href}
+            className="flex items-center gap-3 text-black text-2xl font-semibold"
+            onClick={() => setIsOpen(false)}
+          >
+            <img src={item.iconBlack} alt={item.name} className="h-6 w-6" />
+            {item.name}
+          </a>
+        ))}
+      </div>
+    </header>
+  );
+}
+

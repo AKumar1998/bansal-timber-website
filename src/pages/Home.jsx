@@ -21,7 +21,7 @@ function Home() {
 
       {/* Main content container */}
       <MainContainer>
-        <HomeSlider />
+      {/*  <HomeSlider /> */}
         <HomeIntroSection />
         <HomeIntroProducts />
         <WhyChooseUs />

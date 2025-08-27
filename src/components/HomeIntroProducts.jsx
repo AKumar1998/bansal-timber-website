@@ -35,9 +35,9 @@ export default function HomeIntroProducts() {
         ))}
       </div>
 
-      <div className="my-3 flex justify-center align-items-center">
+   {/*   <div className="mt-6 flex justify-center align-items-center">
         <SimpleButton text="View Products" bgColor="bg-[#FF5724]" textColor="text-white"/>
-      </div>
+      </div> */}
     </div>
   );
 

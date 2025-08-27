@@ -63,7 +63,7 @@ export default function HomeProductsArea() {
 
       <HomeProductsCTA
         text="View the full range of products."
-        button={<SimpleButton text="See More" textColor="text-black" bgColor="bg-white"/>}
+        button={<SimpleButton text="See More" textColor="text-black" to="/products"bgColor="bg-white"/>}
         ctaImage={ctaImage}
       />
 
