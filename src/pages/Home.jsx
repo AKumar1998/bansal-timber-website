@@ -27,10 +27,10 @@ function Home() {
         <WhyChooseUs />
         <HomeProductsArea />
         <HomeProjectShow />
+        <HomeFootCTA />
       </MainContainer>
 
       {/* Footer CTA and Footer */}
-      <HomeFootCTA />
       <Footer />
     </div>
   );

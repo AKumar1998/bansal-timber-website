@@ -1,5 +1,10 @@
 @import 'tailwindcss';
 
+@theme {
+  --breakpoint-3xl: 1920px;
+  --breakpoint-4xl: 2560px;
+}
+
 @font-face {  
   font-family: "SagaceMedium";  
   font-style: normal;

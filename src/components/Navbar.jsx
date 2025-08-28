@@ -70,7 +70,7 @@ export default function Navbar() {
             setNavHovered(false);
             setLinkHovered(null);
           }}
-          className={`relative flex items-center justify-between px-6 py-4 rounded-xl mx-4 md:mx-auto max-w-7xl transition-colors duration-300
+          className={`relative flex items-center justify-between px-6 py-4 rounded-xl mx-4 md:mx-auto max-w-[87.5rem] transition-colors duration-300
             ${isOpen ? "bg-white text-black" : navIsLight ? "bg-white text-black" : "bg-black text-white"}
           `}
         >
@@ -133,12 +133,12 @@ export default function Navbar() {
 
       {/* Mobile Menu (full overlay) */}
       <div
-        className={`fixed top-0 left-0 w-full h-screen bg-black z-40 flex flex-col px-8 pt-28 pb-12 gap-6 transition-transform duration-300 overflow-y-auto
+        className={`fixed top-0 left-0 w-full h-screen bg-black z-40 flex flex-col px-8 pt-[10rem] pb-12 gap-6 transition-transform duration-300 overflow-y-auto
           ${isOpen ? "translate-x-0" : "translate-x-full"}
         `}
       >
         {/* Links (left-aligned) */}
-        <div className="flex flex-col w-full items-start gap-2">
+        <div className="flex flex-col w-full items-start gap-3">
           {navItems.map((item) => (
             <div
               key={item.name}
@@ -164,7 +164,7 @@ export default function Navbar() {
         </div>
 
         {/* Footer info centered */}
-        <div className="mt-8 w-full flex flex-col text-center items-center text-white text-sm gap-4">
+        <div className="mt-8 w-full flex flex-col text-center items-center text-white text-sm gap-5">
           <img src={logoWhite} alt="Logo white" className="h-10 mb-8" />
           <hr className="w-full border-white" />
           <p className="font-[SagaceMedium]">Reach us at:</p>

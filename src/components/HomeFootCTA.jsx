@@ -6,7 +6,7 @@ export default function HomeFootCTA (){
   return(
     
     <div 
-      className="flex flex-col md:flex-row justify-between md:px-40 p-14 gap-8 mb-12"
+      className="flex flex-col md:flex-row rounded-lg justify-between md:px-40 p-14 gap-8 mb-12"
       style={{
         backgroundImage:`url(${footCTAImage})`,
         backgroundSize: "cover",
