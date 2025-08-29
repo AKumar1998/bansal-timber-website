@@ -30,7 +30,7 @@ export default function AboutValues() {
       <SectionTitle title="OUR VALUES" />
 
       <div className="my-8 md:my-24 grid grid-cols-1 md:grid-cols-[40%_50%_10%]">
-        <div className="md:col-start-2 md:col-end-3 w-full max-w-[35rem] justify-self-stretch px-4 md:px-0 flex flex-col gap-12">
+        <div className="md:col-start-2 md:col-end-3 w-full justify-self-stretch px-4 md:px-0 flex flex-col gap-12">
           {values.map((value) => (
             <div key={value.id} className="flex flex-col gap-4">
               <h1 className="font-[NeueHaasBold] text-2xl">{value.title}</h1>
