@@ -1,4 +1,4 @@
-import Navbar from '../components/Navbar.jsx';
+import Navbar from '../components/Navbar.jsx'; 
 import Footer from '../components/Footer.jsx';
 import MainContainer from '../components/Containers/MainContainer.jsx';
 import AboutHero from '../components/AboutHero.jsx';
@@ -6,6 +6,7 @@ import AboutIntro from '../components/AboutIntro.jsx';
 import AboutIntroLine from '../components/AboutIntroLine.jsx';
 import AboutValues from '../components/AboutValues.jsx';
 import AboutFounderWords from '../components/AboutFounderWords.jsx';
+import AboutJourney from '../components/AboutJourney.jsx';
 
 export default function About(){
   return (
@@ -17,6 +18,7 @@ export default function About(){
         <AboutIntro/>
         <AboutValues/>
         <AboutFounderWords/>
+        <AboutJourney/>
       </MainContainer>
       <Footer/>
     </div>

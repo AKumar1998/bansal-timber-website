@@ -11,7 +11,7 @@ export default function FancyButton({ mainText, buttonText, mapsUrl }) {
         href={mapsUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center bg-[#FF5724] text-white font-[SagaceMedium] text-[12px] md:text-[14px] px-4 rounded-full transition-all duration-300 hover:bg-black"
+        className="flex items-center justify-center bg-[#FF5724] text-white font-[SagaceMedium] text-[12px] md:text-[14px] px-4 rounded-full transition-all duration-300 hover:underline"
       >
         {buttonText}
       </a>

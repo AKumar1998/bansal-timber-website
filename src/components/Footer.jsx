@@ -31,7 +31,7 @@ export default function Footer() {
           {footerLinks.map((link) => (
             <Link
               key={link.id}
-              to={`/${link.name.toLowerCase().replace(/\s+/g, "")}`}
+              to={link.name === "Home" ? "/" : `/${link.name.toLowerCase().replace(/\s+/g, "")}`}
               className="text-black font-[SagaceBold] text-[24px] hover:text-[#FF5724] transition-colors"
             >
               {link.name}

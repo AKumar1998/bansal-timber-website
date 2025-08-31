@@ -1,8 +1,32 @@
 @import 'tailwindcss';
+@import "leaflet/dist/leaflet.css";
+
 
 @theme {
   --breakpoint-3xl: 1920px;
   --breakpoint-4xl: 2560px;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+
+
+@font-face {  
+  font-family: "TiroDev";  
+  font-style: normal;
+  font-weight: 500;
+  src: url("./assets/fonts/tiro-dev/tiro-dev2.woff2") format("woff2");
 }
 
 @font-face {  
