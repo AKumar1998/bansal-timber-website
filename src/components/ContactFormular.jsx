@@ -1,9 +1,8 @@
-import NormalRectangleButton from './Buttons/NormalRectangleButton.jsx';
 import ContactInputForm from './ContactInputForm.jsx';
 
 export default function ContactFormular (){
   return(
-    <div className="grid grid-cols-5 bg-[#D9D9D9] md:p-12 my-12">
+    <div className="grid md:grid-cols-5 bg-[#E9E9E9] rounded-lg p-4 space-y-10 md:space-y-0 md:p-12 my-12">
       <div className="md:p-12 col-span-2 space-y-4">
         <h1 className="text-4xl font-[SagaceMedium] text-[#FF5724]">We’ve been<br/> waiting for you!</h1>
         <p className="text-lg font-[NeueHaasRoman]">We want to hear from you.<br/> Let us know how we can help!</p>
@@ -17,10 +16,6 @@ export default function ContactFormular (){
       </div>
       <div className="col-span-3 md:p-12 bg-white rounded-lg">
         <ContactInputForm/>
-        <NormalRectangleButton 
-          text="SEND MESSAGE"
-          type="submit"
-        />
       </div>
     </div>
   );
