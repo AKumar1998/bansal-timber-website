@@ -6,6 +6,8 @@ import ProductsMarquee from '../components/ProductsMarquee.jsx';
 import ProductsFirstCTA from '../components/ProductsFirstCTA.jsx';
 import HomeFootCTA from '../components/HomeFootCTA.jsx';
 import ProductsGallery from '../components/ProductsGallery.jsx';
+import ProductsCarousel from '../components/ProductsCarousel.jsx';
+import ProductsIntro from '../components/ProductsIntro.jsx';
 
 export default function Products(){
   return (
@@ -29,6 +31,8 @@ export default function Products(){
           gap={8}
         />
       <MainContainer>
+        <ProductsIntro/>
+        <ProductsCarousel/>
         <ProductsFirstCTA/>
         <ProductsGallery/>
         <HomeFootCTA/>

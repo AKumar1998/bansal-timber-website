@@ -1,4 +1,3 @@
-// src/components/Buttons/RectangleButton.jsx
 export default function RectangleButton({
   text,           // text shown to users (e.g. "+91 12345 12345" or "Call us")
   phone           // optional; raw phone used for tel: (if not provided we derive from text)

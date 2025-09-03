@@ -7,6 +7,7 @@ import ContactBanner from '../components/ContactBanner.jsx';
 import ContactNumber from '../components/ContactNumber.jsx';
 import ContactFormular from '../components/ContactFormular.jsx';
 import StoreMap from '../components/StoreMap.jsx';
+import ContactCarousel from '../components/ContactCarousel.jsx';
 
 export default function Contact(){
   return (
@@ -18,6 +19,7 @@ export default function Contact(){
       />
       <MainContainer>
         <ContactBanner/>
+        <ContactCarousel/>
         <ContactNumber/>
         <ContactFormular/>
         <StoreMap/>
