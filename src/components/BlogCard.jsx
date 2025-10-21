@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import PaginationControls from './PaginationControls.jsx';
 
 export default function BlogCard() {
   const [blogs, setBlogs] = useState([]);
@@ -27,8 +28,6 @@ export default function BlogCard() {
     fetchBlogs();
   }, [page, perPage]);
 
-  const totalPages = Math.ceil(total / perPage);
-
   return (
     <div className="py-8">
       <h1 className="text-4xl font-bold mb-8 text-center md:text-left">Latest Blogs</h1>
@@ -45,7 +44,6 @@ export default function BlogCard() {
                 to={`/blogs/${blog.slug}`}
                 className="bg-white rounded-xl shadow-md hover:shadow-xl transition transform hover:-translate-y-1 overflow-hidden flex flex-col cursor-pointer group"
               >
-                {/* Blog Image */}
                 {blog.image && (
                   <img
                     src={blog.image}
@@ -53,13 +51,9 @@ export default function BlogCard() {
                     className="w-full h-56 md:h-48 object-cover"
                   />
                 )}
-
-                {/* Blog Content */}
                 <div className="p-6 flex flex-col flex-1">
                   <h2 className="text-2xl font-semibold mb-3 line-clamp-2">{blog.title}</h2>
                   <p className="text-gray-600 flex-1 mb-4 line-clamp-3">{blog.excerpt}</p>
-
-                  {/* CTA */}
                   <span className="mt-auto text-blue-600 font-semibold group-hover:underline">
                     Read More →
                   </span>
@@ -68,24 +62,13 @@ export default function BlogCard() {
             ))}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center mt-10 space-x-2">
-              {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`px-4 py-2 rounded-md font-medium ${
-                    page === p
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  } transition`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Reusable Pagination */}
+          <PaginationControls
+            currentPage={page}
+            totalItems={total}
+            perPage={perPage}
+            onPageChange={setPage}
+          />
         </>
       )}
     </div>

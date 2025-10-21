@@ -2,9 +2,9 @@ import founder from '../assets/images/founder-image.jpg';
 
 export default function AboutFounderWords() {
   return (
-    <div className="bg-black p-6 md:p-12 rounded-lg md:rounded-xl">
+    <div className="bg-gray-200 p-6 md:p-12 rounded-lg md:rounded-xl">
       {/* Main founder words section */}
-      <div className="flex flex-col md:flex-row items-stretch bg-black">
+      <div className="flex flex-col md:flex-row items-stretch">
         {/* Founder image */}
         <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-8 flex items-center">
           <img

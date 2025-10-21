@@ -9,6 +9,8 @@ import HomeProductsArea from '../components/Containers/HomeProductsArea.jsx';
 import HomeProjectShow from '../components/HomeProjectShow.jsx';
 import HomeFootCTA from '../components/HomeFootCTA.jsx';
 import Footer from '../components/Footer.jsx';
+import ProductsCarousel from '../components/ProductsCarousel.jsx';
+import TestimonialsSection from '../components/TestimonialsSection.jsx';
 
 function Home() {
   return (
@@ -22,10 +24,12 @@ function Home() {
       {/* Main content container */}
       <MainContainer>
       {/*  <HomeSlider /> */}
+        <ProductsCarousel/>
         <HomeIntroSection />
         <HomeIntroProducts />
         <WhyChooseUs />
         <HomeProductsArea />
+        <TestimonialsSection/>
         <HomeProjectShow />
         <HomeFootCTA />
       </MainContainer>

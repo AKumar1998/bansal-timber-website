@@ -9,7 +9,8 @@ export default function ContactInputForm() {
     message: "",
   });
 
-  const [submitted, setSubmitted] = useState(false); // Track submission
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState({ type: "", message: "" });
 
   const handleChange = (e) => {
     setFormData({
@@ -18,26 +19,57 @@ export default function ContactInputForm() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    setSubmitted(true); // Set success state
-    // Optional: reset form after submission
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      service: "",
-      message: "",
-    });
+    setLoading(true);
+    setStatus({ type: "", message: "" });
 
-    // Later: send to API / backend
+    try {
+      const formBody = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        formBody.append(key, value);
+      });
+
+      const response = await fetch(
+        "/api/submit_contact_form.php",
+        {
+          method: "POST",
+          body: formBody,
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        setStatus({ type: "success", message: result.message });
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          service: "",
+          message: "",
+        });
+      } else {
+        setStatus({
+          type: "error",
+          message: result.message || "Something went wrong.",
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setStatus({
+        type: "error",
+        message: "Server error. Please try again later.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-3xl mx-auto bg-white p-8 md:p-4 rounded-2xl space-y-6"
+      className="max-w-3xl mx-auto bg-white p-8 md:p-4 rounded-2xl space-y-6 shadow-md"
     >
       <h2 className="text-2xl font-semibold text-gray-800 text-center">
         Contact Us
@@ -77,7 +109,7 @@ export default function ContactInputForm() {
         />
       </div>
 
-      {/* Contact Number */}
+      {/* Phone */}
       <div className="flex flex-col">
         <label htmlFor="phone" className="mb-1 font-medium text-gray-700">
           Contact Number <span className="text-red-500">*</span>
@@ -94,7 +126,7 @@ export default function ContactInputForm() {
         />
       </div>
 
-      {/* Dropdown */}
+      {/* Category Dropdown */}
       <div className="flex flex-col">
         <label htmlFor="service" className="mb-1 font-medium text-gray-700">
           Select a Category
@@ -107,7 +139,7 @@ export default function ContactInputForm() {
           className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
         >
           <option value="">-- Select the category --</option>
-          <option value="BlockBoards">Block Boards</option>
+          <option value="Block Boards">Block Boards</option>
           <option value="HDHMR Boards">HDHMR Boards</option>
           <option value="Plywood">Plywood</option>
           <option value="Flush Doors">Flush Doors</option>
@@ -140,17 +172,50 @@ export default function ContactInputForm() {
       <div className="text-center">
         <button
           type="submit"
-          className={`px-6 py-3 font-semibold rounded-lg focus:ring-2 focus:outline-none transition ${
-            submitted
-              ? "bg-green-600 text-white hover:bg-green-700 focus:ring-green-400"
+          disabled={loading}
+          className={`px-6 py-3 font-semibold rounded-lg transition focus:ring-2 focus:outline-none ${
+            loading
+              ? "bg-gray-400 text-white cursor-not-allowed"
               : "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-400"
           }`}
         >
-          {submitted ? "Submitted" : "Submit"}
+          {loading ? (
+            <span className="flex items-center justify-center">
+              <svg
+                className="animate-spin h-5 w-5 mr-2 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                ></path>
+              </svg>
+              Sending...
+            </span>
+          ) : (
+            "Submit"
+          )}
         </button>
-        {submitted && (
-          <p className="mt-2 text-green-700 font-medium">
-            ✅ Your form has been submitted!
+
+        {/* Success / Error Message */}
+        {status.message && (
+          <p
+            className={`mt-3 font-medium ${
+              status.type === "success" ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {status.message}
           </p>
         )}
       </div>

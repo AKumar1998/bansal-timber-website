@@ -8,4 +8,14 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-})
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://bansaltimber.com',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+});
+

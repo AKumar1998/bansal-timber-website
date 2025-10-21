@@ -6,8 +6,8 @@ import ProductsMarquee from '../components/ProductsMarquee.jsx';
 import ProductsFirstCTA from '../components/ProductsFirstCTA.jsx';
 import HomeFootCTA from '../components/HomeFootCTA.jsx';
 import ProductsGallery from '../components/ProductsGallery.jsx';
-import ProductsCarousel from '../components/ProductsCarousel.jsx';
 import ProductsIntro from '../components/ProductsIntro.jsx';
+import ProductsAll from '../components/Containers/ProductsAll.jsx';
 
 export default function Products(){
   return (
@@ -32,7 +32,7 @@ export default function Products(){
         />
       <MainContainer>
         <ProductsIntro/>
-        <ProductsCarousel/>
+        <ProductsAll/>
         <ProductsFirstCTA/>
         <ProductsGallery/>
         <HomeFootCTA/>
