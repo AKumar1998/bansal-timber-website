@@ -1,14 +1,32 @@
-import founder from '../assets/images/founder-image.jpg';
+import { useEffect, useState } from "react";
 
 export default function AboutFounderWords() {
+  const [founderImage, setFounderImage] = useState(null);
+
+  useEffect(() => {
+    fetch("https://bansaltimber.com/api/get_founder_section.php")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setFounderImage(data.data.founder_image);
+      })
+      .catch((err) => console.error("Error fetching founder image:", err));
+  }, []);
+
+  if (!founderImage) {
+    return (
+      <div className="w-full h-64 flex items-center justify-center text-gray-500">
+        Loading founder section...
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gray-200 p-6 md:p-12 rounded-lg md:rounded-xl">
-      {/* Main founder words section */}
       <div className="flex flex-col md:flex-row items-stretch">
         {/* Founder image */}
         <div className="bg-white rounded-lg md:rounded-xl p-4 md:p-8 flex items-center">
           <img
-            src={founder}
+            src={founderImage}
             alt="Founder"
             className="h-full object-cover rounded-lg md:rounded-xl"
           />
@@ -28,7 +46,6 @@ export default function AboutFounderWords() {
         </div>
       </div>
 
-      {/* Hindi tagline */}
       <div className="bg-[#6B1900] p-12 md:p-18 rounded-lg md:rounded-xl ">
         <h1 className="font-[TiroDev] text-2xl md:text-[32px] text-center text-white">
           व्यापार का सार, उत्तम व्यवहार।
@@ -36,5 +53,5 @@ export default function AboutFounderWords() {
       </div>
     </div>
   );
-};
+}
 

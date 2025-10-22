@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 
 export default function StoreMap() {
   useEffect(() => {
-    const storeCoords = [28.6139, 77.2090]; // New Delhi
+    const storeCoords = [28.517328617241777, 77.17876214938164]; //Store Coordinates
     const map = L.map("store-map", {
       center: storeCoords,
       zoom: 13,
@@ -77,8 +77,8 @@ export default function StoreMap() {
 
         {/* Footer Info Bar */}
         <div className="bg-gray-50 p-4 text-center">
-          <p className="text-gray-700">📍 Address: Connaught Place, New Delhi</p>
-          <p className="text-gray-500 text-sm">Open: 9:00 AM – 9:00 PM</p>
+          <p className="text-gray-700">📍 Address: 897 B Ward, no.8, Main Bazar Rd, Ward no- 2, Aam Bagh, Mehrauli Village, Mehrauli, New Delhi, Delhi 110030</p>
+          <p className="text-gray-500 text-sm">Open: 9:30 AM – 8:00 PM</p>
         </div>
       </div>
     </div>

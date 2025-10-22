@@ -1,16 +1,46 @@
-import imageOne from '../assets/images/product-image1.jpg';
-import imageTwo from '../assets/images/product-image2.jpg';
-import imageThree from '../assets/images/product-image3.jpg';
-import RectangleButton from './Buttons/RectangleButton.jsx';
-import bannerImage from '../assets/images/number-banner.jpg';
+import { useEffect, useState } from "react";
+import RectangleButton from "./Buttons/RectangleButton.jsx";
 
 export default function ProductsIntro() {
+  const [introData, setIntroData] = useState(null);
+
+  useEffect(() => {
+    fetch("https://bansaltimber.com/api/get_products_intro.php")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Products Intro response:", data);
+        if (data.success) {
+          console.log("✅ Setting intro data");
+          setIntroData(data.data);
+        } else {
+          console.warn("❌ data.success is false");
+        }
+      })
+      .catch((err) => console.error("Error fetching products intro:", err));
+  }, []);
+  useEffect(() => {
+    fetch("https://bansaltimber.com/api/get_products_intro.php")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setIntroData(data.data);
+      })
+      .catch((err) => console.error("Error fetching products intro:", err));
+  }, []);
+
+  if (!introData) {
+    return (
+      <div className="w-full h-64 flex items-center justify-center text-gray-500">
+        Loading section...
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col my-12 md:flex-row gap-4">
       {/* Left side big image */}
       <div className="flex-1 overflow-hidden rounded-xl">
         <img
-          src={imageOne}
+          src={introData.large_image}
           alt=""
           className="w-full h-full object-cover"
         />
@@ -18,39 +48,40 @@ export default function ProductsIntro() {
 
       {/* Right side grid */}
       <div className="flex-1 grid grid-cols-2 auto-rows-fr gap-4">
-        {/* Square image */}
+        {/* Square image 1 */}
         <div className="overflow-hidden rounded-xl">
           <img
-            src={imageTwo}
-            alt="Flush Doors"
+            src={introData.small_image_1}
+            alt="Product 1"
             className="w-full h-full object-cover"
           />
         </div>
 
-        {/* Square image */}
+        {/* Square image 2 */}
         <div className="overflow-hidden rounded-xl">
           <img
-            src={imageThree}
-            alt="Wooden Flooring"
+            src={introData.small_image_2}
+            alt="Product 2"
             className="w-full h-full object-cover"
           />
         </div>
 
         {/* Text + Buttons */}
-        <div 
+        <div
           className="col-span-2 flex flex-col justify-center p-8 md:px-24 gap-6 rounded-xl"
           style={{
-            backgroundImage: `url(${bannerImage})`,
+            backgroundImage: `url(${introData.banner_image})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         >
-          <h1 className="text-2xl text-white font-[SagaceMedium] leading-snug">
-            Any queries? <br /> Feel free to contact us.
-          </h1>
+          <h1
+            className="text-2xl text-white font-[SagaceMedium] leading-snug"
+            dangerouslySetInnerHTML={{ __html: introData.heading_text }}
+          ></h1>
           <div className="flex flex-col md:flex-row gap-6">
-            <RectangleButton text="+91 12345 12345" />
-            <RectangleButton text="+91 12345 12345" />
+            <RectangleButton text={introData.phone_1} />
+            <RectangleButton text={introData.phone_2} />
           </div>
         </div>
       </div>

@@ -1,70 +1,96 @@
 import { useEffect, useState, useRef } from "react";
-import img1 from "../assets/images/p-car-img1.jpg";
-import img2 from "../assets/images/p-car-img2.jpg";
-import img3 from "../assets/images/p-car-img3.jpg";
-import img4 from "../assets/images/p-car-img4.jpg";
 
-export default function ImageCarousel() {
-  const slides = [img1, img2, img3, img4];
-  const totalSlides = slides.length;
-
-  // Add clones for smooth looping
-  const extendedSlides = [slides[totalSlides - 1], ...slides, slides[0]];
-
-  const [current, setCurrent] = useState(1); // start at the first *real* slide
+export default function ProductsCarousel() {
+  const [slides, setSlides] = useState([]);
+  const [index, setIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const intervalRef = useRef(null);
-
-  // Touch/swipe refs
+  const containerRef = useRef(null);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  const goToNext = () => {
-    setCurrent((prev) => prev + 1);
-    setIsTransitioning(true);
-  };
-
-  const goToPrev = () => {
-    setCurrent((prev) => prev - 1);
-    setIsTransitioning(true);
-  };
-
-  // Auto-slide every 5s
+  // ✅ Fetch carousel images
   useEffect(() => {
-    intervalRef.current = setInterval(goToNext, 5000);
-    return () => clearInterval(intervalRef.current);
+    fetch("https://bansaltimber.com/api/get_product_carousel.php")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.carousel.length > 0) {
+          const images = data.carousel.map(
+            (item) => "https://bansaltimber.com" + item.image_url
+          );
+          setSlides(images);
+          setIndex(1);
+        }
+      })
+      .catch((err) => console.error("Error fetching carousel:", err));
   }, []);
 
-  // Handle the "infinite" reset after transition ends
-  const handleTransitionEnd = () => {
-    if (current === extendedSlides.length - 1) {
-      // If we’re at the cloned last -> reset to first real
-      setIsTransitioning(false);
-      setCurrent(1);
-    } else if (current === 0) {
-      // If we’re at the cloned first -> reset to last real
-      setIsTransitioning(false);
-      setCurrent(totalSlides);
-    } else {
-      setIsTransitioning(true);
-    }
-  };
+  const total = slides.length;
+  const extendedSlides =
+    total > 0 ? [slides[total - 1], ...slides, slides[0]] : [];
 
-  // Handle swipe
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-  const handleTouchMove = (e) => {
-    touchEndX.current = e.touches[0].clientX;
-  };
+  // ✅ Auto-slide
+  useEffect(() => {
+    if (total === 0) return;
+    clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setIndex((prev) => prev + 1);
+    }, 5000);
+    return () => clearInterval(intervalRef.current);
+  }, [total]);
+
+  // ✅ Core infinite loop logic (with ref-based snap)
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || total === 0) return;
+
+    // Apply transition normally
+    container.style.transition = isTransitioning
+      ? "transform 0.7s ease-in-out"
+      : "none";
+    container.style.transform = `translateX(-${index * 100}%)`;
+
+    // Handle seamless snapping
+    const handleTransitionEnd = () => {
+      if (index === total + 1) {
+        // Snap to first slide (no animation)
+        setIsTransitioning(false);
+        setIndex(1);
+      } else if (index === 0) {
+        // Snap to last slide (no animation)
+        setIsTransitioning(false);
+        setIndex(total);
+      }
+    };
+
+    container.addEventListener("transitionend", handleTransitionEnd);
+    return () => container.removeEventListener("transitionend", handleTransitionEnd);
+  }, [index, total, isTransitioning]);
+
+  // Re-enable transitions after snapping (1 frame later)
+  useEffect(() => {
+    if (!isTransitioning) {
+      const id = requestAnimationFrame(() => setIsTransitioning(true));
+      return () => cancelAnimationFrame(id);
+    }
+  }, [isTransitioning]);
+
+  // ✅ Swipe support
+  const handleTouchStart = (e) => (touchStartX.current = e.touches[0].clientX);
+  const handleTouchMove = (e) => (touchEndX.current = e.touches[0].clientX);
   const handleTouchEnd = () => {
     const diff = touchStartX.current - touchEndX.current;
-    if (diff > 50) {
-      goToNext();
-    } else if (diff < -50) {
-      goToPrev();
-    }
+    if (diff > 50) setIndex((prev) => prev + 1);
+    else if (diff < -50) setIndex((prev) => prev - 1);
   };
+
+  if (total === 0) {
+    return (
+      <div className="w-full h-64 flex items-center justify-center text-gray-500">
+        Loading carousel...
+      </div>
+    );
+  }
 
   return (
     <div
@@ -73,31 +99,28 @@ export default function ImageCarousel() {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Slider wrapper */}
-      <div
-        className={`flex ${isTransitioning ? "transition-transform duration-700 ease-in-out" : ""}`}
-        style={{ transform: `translateX(-${current * 100}%)` }}
-        onTransitionEnd={handleTransitionEnd}
-      >
-        {extendedSlides.map((slide, index) => (
-          <div key={index} className="w-full flex-shrink-0">
+      {/* ✅ Slides container */}
+      <div ref={containerRef} className="flex">
+        {extendedSlides.map((slide, i) => (
+          <div key={i} className="w-full flex-shrink-0">
             <img
               src={slide}
-              alt={`Slide ${index}`}
+              alt={`Slide ${i}`}
               className="w-full h-auto object-cover aspect-[18/9]"
+              loading="lazy"
             />
           </div>
         ))}
       </div>
 
-      {/* Indicators */}
+      {/* ✅ Dots */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-3">
-        {slides.map((_, index) => (
+        {slides.map((_, i) => (
           <button
-            key={index}
-            onClick={() => setCurrent(index + 1)} // +1 because of cloned start
+            key={i}
+            onClick={() => setIndex(i + 1)}
             className={`h-2 w-2 md:h-3 md:w-3 mb-2 md:mb-4 rounded-full transition-all duration-300 ${
-              current === index + 1 ? "bg-white scale-125" : "bg-gray-400"
+              index === i + 1 ? "bg-white scale-125" : "bg-gray-400"
             }`}
           />
         ))}
