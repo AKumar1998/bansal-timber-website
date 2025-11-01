@@ -28,6 +28,19 @@ export default function BlogCard() {
     fetchBlogs();
   }, [page, perPage]);
 
+  const getImageUrl = (image) => {
+    if (!image || image.trim() === '') {
+      return 'https://bansaltimber.com/uploads/blog-images/default.jpg';
+    }
+
+    // if the URL is relative (not full https://), prefix with domain
+    if (!image.startsWith('http')) {
+      return `https://bansaltimber.com${image}`;
+    }
+
+    return image;
+  };
+
   return (
     <div className="py-8">
       <h1 className="text-4xl font-bold mb-8 text-center md:text-left">Latest Blogs</h1>
@@ -44,13 +57,11 @@ export default function BlogCard() {
                 to={`/blogs/${blog.slug}`}
                 className="bg-white rounded-xl shadow-md hover:shadow-xl transition transform hover:-translate-y-1 overflow-hidden flex flex-col cursor-pointer group"
               >
-                {blog.image && (
-                  <img
-                    src={blog.image}
-                    alt={blog.title}
-                    className="w-full h-56 md:h-48 object-cover"
-                  />
-                )}
+                <img
+                  src={getImageUrl(blog.image)}
+                  alt={blog.title}
+                  className="w-full h-56 md:h-48 object-cover"
+                />
                 <div className="p-6 flex flex-col flex-1">
                   <h2 className="text-2xl font-semibold mb-3 line-clamp-2">{blog.title}</h2>
                   <p className="text-gray-600 flex-1 mb-4 line-clamp-3">{blog.excerpt}</p>
