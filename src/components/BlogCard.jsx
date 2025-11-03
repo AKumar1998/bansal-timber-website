@@ -8,13 +8,14 @@ export default function BlogCard() {
   const [perPage] = useState(6);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [sort, setSort] = useState('newest'); // 🟢 sort state
 
   useEffect(() => {
     async function fetchBlogs() {
       setLoading(true);
       try {
         const response = await fetch(
-          `https://bansaltimber.com/api/get_blogs.php?per_page=${perPage}&page=${page}`
+          `https://bansaltimber.com/api/get_blogs.php?per_page=${perPage}&page=${page}&sort=${sort}`
         );
         const data = await response.json();
         setBlogs(data.blogs);
@@ -26,24 +27,40 @@ export default function BlogCard() {
     }
 
     fetchBlogs();
-  }, [page, perPage]);
+  }, [page, perPage, sort]); // 🟢 added sort dependency
 
   const getImageUrl = (image) => {
     if (!image || image.trim() === '') {
       return 'https://bansaltimber.com/uploads/blog-images/default.jpg';
     }
-
-    // if the URL is relative (not full https://), prefix with domain
     if (!image.startsWith('http')) {
       return `https://bansaltimber.com${image}`;
     }
-
     return image;
   };
 
   return (
     <div className="py-8">
-      <h1 className="text-4xl font-bold mb-8 text-center md:text-left">Latest Blogs</h1>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <h1 className="text-4xl font-bold text-center md:text-left mb-4 md:mb-0">
+          Latest Blogs
+        </h1>
+
+        {/* 🟢 Sort Dropdown */}
+        <select
+          value={sort}
+          onChange={(e) => {
+            setSort(e.target.value);
+            setPage(1);
+          }}
+          className="border border-gray-300 rounded-lg px-3 py-2 text-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="az">A – Z</option>
+          <option value="za">Z – A</option>
+        </select>
+      </div>
 
       {loading ? (
         <p className="text-center text-gray-500">Loading blogs...</p>
@@ -73,7 +90,7 @@ export default function BlogCard() {
             ))}
           </div>
 
-          {/* Reusable Pagination */}
+          {/* Pagination */}
           <PaginationControls
             currentPage={page}
             totalItems={total}

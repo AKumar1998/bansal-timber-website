@@ -7,6 +7,7 @@ export default function Blogs() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
+  const [sortOption, setSortOption] = useState("newest"); // 🔸 added
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -16,7 +17,6 @@ export default function Blogs() {
     status: "draft",
   });
 
-  // Fetch blogs
   const fetchBlogs = () => {
     setLoading(true);
     fetch("https://bansaltimber.com/api/get_admin_blogs.php")
@@ -32,7 +32,24 @@ export default function Blogs() {
     fetchBlogs();
   }, []);
 
-  // Auto-generate slug
+  // 🔸 Sorting logic
+  const sortedBlogs = [...blogs].sort((a, b) => {
+    switch (sortOption) {
+      case "oldest":
+        return new Date(a.created_at) - new Date(b.created_at);
+      case "title-az":
+        return a.title.localeCompare(b.title);
+      case "title-za":
+        return b.title.localeCompare(a.title);
+      case "published-first":
+        return a.status === "published" ? -1 : 1;
+      case "drafts-first":
+        return a.status === "draft" ? -1 : 1;
+      default: // newest
+        return new Date(b.created_at) - new Date(a.created_at);
+    }
+  });
+
   const handleTitleChange = (title) => {
     const slug = title
       .toLowerCase()
@@ -42,13 +59,13 @@ export default function Blogs() {
     setForm((f) => ({ ...f, title, slug }));
   };
 
-  // Image upload
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const formData = new FormData();
     formData.append("image", file);
+    if (form.image) formData.append("oldImage", form.image);
 
     const res = await fetch("https://bansaltimber.com/api/upload_blog_image.php", {
       method: "POST",
@@ -57,14 +74,12 @@ export default function Blogs() {
 
     const data = await res.json();
     if (data.success) {
-      // Set the relative path to send to add_blog.php
       setForm((f) => ({ ...f, image: data.url }));
     } else {
       alert("Image upload failed.");
     }
   };
 
-  // Save blog (Add or Update)
   const handleSubmit = async (e) => {
     e.preventDefault();
     const apiUrl = editingBlog
@@ -88,14 +103,12 @@ export default function Blogs() {
     }
   };
 
-  // Edit blog
   const handleEdit = (blog) => {
     setEditingBlog(blog);
     setForm(blog);
     setShowModal(true);
   };
 
-  // Delete blog
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this blog?")) return;
     const res = await fetch("https://bansaltimber.com/api/delete_blog.php", {
@@ -107,7 +120,6 @@ export default function Blogs() {
     if (data.success) fetchBlogs();
   };
 
-  // Reset modal
   const handleCloseModal = () => {
     setShowModal(false);
     setEditingBlog(null);
@@ -117,24 +129,41 @@ export default function Blogs() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <h1 className="text-2xl font-semibold text-gray-800">Manage Blogs</h1>
-        <button
-          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow"
-          onClick={() => setShowModal(true)}
-        >
-          + Add Blog
-        </button>
+
+        <div className="flex items-center gap-3">
+          {/* 🔸 Sort Dropdown */}
+          <select
+            className="border p-2 rounded text-gray-700"
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+          >
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="title-az">Title A–Z</option>
+            <option value="title-za">Title Z–A</option>
+            <option value="published-first">Published First</option>
+            <option value="drafts-first">Drafts First</option>
+          </select>
+
+          <button
+            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow"
+            onClick={() => setShowModal(true)}
+          >
+            + Add Blog
+          </button>
+        </div>
       </div>
 
       {/* Blog Cards */}
       {loading ? (
         <p>Loading...</p>
-      ) : blogs.length === 0 ? (
+      ) : sortedBlogs.length === 0 ? (
         <p>No blogs found.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {blogs.map((b) => (
+          {sortedBlogs.map((b) => (
             <div
               key={b.id}
               className="bg-white rounded-2xl shadow hover:shadow-lg transition p-4 flex flex-col"
@@ -178,18 +207,31 @@ export default function Blogs() {
 
       {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-2xl overflow-y-auto max-h-[90vh]">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999]">
+          <div
+            className="relative bg-white p-6 rounded-2xl shadow-lg w-full max-w-2xl overflow-y-auto max-h-[90vh]"
+            style={{ pointerEvents: "auto" }}
+          >
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl leading-none z-10"
+              type="button"
+            >
+              &times;
+            </button>
+
             <h2 className="text-xl font-semibold mb-4">
               {editingBlog ? "Edit Blog" : "Add Blog"}
             </h2>
-            <form className="space-y-4" onSubmit={handleSubmit}>
+
+            <form className="space-y-4 relative z-20" onSubmit={handleSubmit}>
               <input
                 type="text"
                 placeholder="Title"
                 className="w-full border p-2 rounded"
                 value={form.title}
                 onChange={(e) => handleTitleChange(e.target.value)}
+                required
               />
               <input
                 type="text"
@@ -197,6 +239,7 @@ export default function Blogs() {
                 className="w-full border p-2 rounded"
                 value={form.slug}
                 onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                required
               />
               <input
                 type="text"
@@ -204,6 +247,7 @@ export default function Blogs() {
                 className="w-full border p-2 rounded"
                 value={form.excerpt}
                 onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+                required
               />
               <ReactQuill
                 theme="snow"
@@ -211,7 +255,6 @@ export default function Blogs() {
                 onChange={(value) => setForm({ ...form, body: value })}
               />
 
-              {/* Improved Upload Button */}
               <label className="cursor-pointer inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded shadow">
                 Upload Image
                 <input type="file" className="hidden" onChange={handleFileChange} />
@@ -234,7 +277,7 @@ export default function Blogs() {
                 <option value="archived">Archived</option>
               </select>
 
-              <div className="flex justify-end space-x-3">
+              <div className="flex justify-end space-x-3 mt-4">
                 <button
                   type="button"
                   onClick={handleCloseModal}
@@ -244,7 +287,7 @@ export default function Blogs() {
                 </button>
                 <button
                   type="submit"
-                  className="bg-orange-500 text-white px-4 py-2 rounded"
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded"
                 >
                   {editingBlog ? "Update" : "Save"}
                 </button>
