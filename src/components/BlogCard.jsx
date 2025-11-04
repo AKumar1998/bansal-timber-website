@@ -15,7 +15,7 @@ export default function BlogCard() {
       setLoading(true);
       try {
         const response = await fetch(
-          `https://bansaltimber.com/api/get_blogs.php?per_page=${perPage}&page=${page}&sort=${sort}`
+          `https://bansaltimber.com/api/blogs/get_blogs.php?per_page=${perPage}&page=${page}&sort=${sort}`
         );
         const data = await response.json();
         setBlogs(data.blogs);
@@ -27,7 +27,7 @@ export default function BlogCard() {
     }
 
     fetchBlogs();
-  }, [page, perPage, sort]); // 🟢 added sort dependency
+  }, [page, perPage, sort]); // added sort dependency
 
   const getImageUrl = (image) => {
     if (!image || image.trim() === '') {
@@ -46,7 +46,7 @@ export default function BlogCard() {
           Latest Blogs
         </h1>
 
-        {/* 🟢 Sort Dropdown */}
+        {/* Sort Dropdown */}
         <select
           value={sort}
           onChange={(e) => {

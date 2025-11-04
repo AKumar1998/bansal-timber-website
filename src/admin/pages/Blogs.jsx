@@ -19,7 +19,7 @@ export default function Blogs() {
 
   const fetchBlogs = () => {
     setLoading(true);
-    fetch("https://bansaltimber.com/api/get_admin_blogs.php")
+    fetch("https://bansaltimber.com/api/blogs/get_admin_blogs.php")
       .then((res) => res.json())
       .then((data) => {
         setBlogs(data.blogs || []);
@@ -67,7 +67,7 @@ export default function Blogs() {
     formData.append("image", file);
     if (form.image) formData.append("oldImage", form.image);
 
-    const res = await fetch("https://bansaltimber.com/api/upload_blog_image.php", {
+    const res = await fetch("https://bansaltimber.com/api/blogs/upload_blog_image.php", {
       method: "POST",
       body: formData,
     });
@@ -83,8 +83,8 @@ export default function Blogs() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const apiUrl = editingBlog
-      ? "https://bansaltimber.com/api/update_blog.php"
-      : "https://bansaltimber.com/api/add_blog.php";
+      ? "https://bansaltimber.com/api/blogs/update_blog.php"
+      : "https://bansaltimber.com/api/blogs/add_blog.php";
 
     const res = await fetch(apiUrl, {
       method: "POST",
@@ -111,7 +111,7 @@ export default function Blogs() {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this blog?")) return;
-    const res = await fetch("https://bansaltimber.com/api/delete_blog.php", {
+    const res = await fetch("https://bansaltimber.com/api/blogs/delete_blog.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),

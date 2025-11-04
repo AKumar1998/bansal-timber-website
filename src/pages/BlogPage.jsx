@@ -16,7 +16,7 @@ export default function BlogPage() {
     async function fetchBlog() {
       try {
         const res = await fetch(
-          `https://bansaltimber.com/api/get_blog.php?slug=${slug}`
+          `https://bansaltimber.com/api/blogs/get_blog.php?slug=${slug}`
         );
 
         if (!res.ok) throw new Error("Blog not found or server error");
