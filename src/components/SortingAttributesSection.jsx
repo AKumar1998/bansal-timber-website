@@ -32,7 +32,14 @@ export default function SortingAttributesSection({
     );
 
   const blockedCategories = ['All Products', 'Miscellaneous'];
-  if (!selectedCategory || blockedCategories.includes(selectedCategory.name)) return null;
+  if (
+    !selectedCategory ||
+    blockedCategories.includes(selectedCategory.name) ||
+    !attributes ||
+    attributes.length === 0
+  ) {
+    return null;
+  }
 
   const toggleOption = (attributeId, optionValue) => {
     setSelected(prev => {
@@ -88,11 +95,10 @@ export default function SortingAttributesSection({
                 return (
                   <label
                     key={optionId}
-                    className={`flex items-center px-3 py-2 rounded-lg border cursor-pointer transition-all ${
-                      checked
+                    className={`flex items-center px-3 py-2 rounded-lg border cursor-pointer transition-all ${checked
                         ? 'bg-orange-50 border-orange-400 text-orange-600 font-medium'
                         : 'bg-gray-50 border-gray-200 text-gray-700 hover:border-orange-300 hover:text-orange-600'
-                    } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                      } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
                   >
                     <input
                       type="checkbox"

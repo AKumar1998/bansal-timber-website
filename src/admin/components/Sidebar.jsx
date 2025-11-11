@@ -5,7 +5,7 @@ export default function Sidebar() {
     { name: "Dashboard", path: "/admin", icon: "📊" },
     { name: "Products", path: "/admin/products", icon: "📦" },
     { name: "Blogs", path: "/admin/blogs", icon: "📝" },
-    { name: "Categories", path: "/admin/categories", icon: "🗂️" },
+    { name: "Bundles", path: "/admin/bundles", icon: "🗂️" },
     { name: "Testimonials", path: "/admin/testimonials", icon: "💬" },
   ];
 
