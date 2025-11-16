@@ -9,7 +9,12 @@ export default function CategoryProducts({ category, onBack }) {
   // Modal state
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
+
+  // Attributes
+  const [filterAttributes, setFilterAttributes] = useState([]);
   const [attributes, setAttributes] = useState([]);
+
+  // Form
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -17,6 +22,50 @@ export default function CategoryProducts({ category, onBack }) {
     attribute_values: {},
   });
 
+  // UX message system (Style C + Placement C)
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalMessageType, setModalMessageType] = useState("");
+
+  const showMessage = (text, type) => {
+    setMessage(text);
+    setMessageType(type);
+    if (type !== "loading") {
+      setTimeout(() => {
+        setMessage("");
+        setMessageType("");
+      }, 2500);
+    }
+  };
+
+  const showModalMessage = (text, type) => {
+    setModalMessage(text);
+    setModalMessageType(type);
+    if (type !== "loading") {
+      setTimeout(() => {
+        setModalMessage("");
+        setModalMessageType("");
+      }, 2500);
+    }
+  };
+
+  const messageClasses = {
+    loading: "bg-blue-100 text-blue-700 border-blue-300",
+    success: "bg-green-100 text-green-700 border-green-300",
+    error: "bg-red-100 text-red-700 border-red-300",
+  };
+
+  // Image normalizer
+  const cleanImageUrl = (url) => {
+    if (!url) return "https://bansaltimber.com/uploads/dummy.jpg";
+    if (url.startsWith("http")) return url;
+    let clean = url.replace(/^\/+/, "");
+    if (clean.startsWith("uploads/")) return `https://bansaltimber.com/${clean}`;
+    return `https://bansaltimber.com/uploads/${clean}`;
+  };
+
+  // Fetch products
   const fetchProducts = () => {
     if (!category?.id) return;
     setLoading(true);
@@ -40,14 +89,14 @@ export default function CategoryProducts({ category, onBack }) {
   };
 
   const fetchFilterAttributes = () => {
+    if (!category?.id) return setFilterAttributes([]);
+
     fetch(
-      `https://bansaltimber.com/api/products/get_admin_attributes.php?category_id=${category.id}&mode=filter`
+      `https://bansaltimber.com/api/products/get_admin_attributes.php?category_id=${category.id}&mode=filter&t=${Date.now()}`
     )
       .then((res) => res.json())
-      .then((data) => {
-        setAttributes(data.attributes || []);
-      })
-      .catch(() => setAttributes([]));
+      .then((data) => setFilterAttributes(data.attributes || []))
+      .catch(() => setFilterAttributes([]));
   };
 
   useEffect(() => {
@@ -60,24 +109,18 @@ export default function CategoryProducts({ category, onBack }) {
   }, [filters, search]);
 
   const fetchAttributeBundle = () => {
+    setAttributes([]);
     fetch(
-      `https://bansaltimber.com/api/products/get_admin_attributes.php?category_id=${category.id}`
+      `https://bansaltimber.com/api/products/get_admin_attributes.php?category_id=${category.id}&mode=full&t=${Date.now()}`
     )
       .then((res) => res.json())
-      .then((data) => {
-        setAttributes(data.attributes || []);
-      })
+      .then((data) => setAttributes(data.attributes || []))
       .catch(() => setAttributes([]));
   };
 
   const openAddModal = () => {
     setEditing(null);
-    setForm({
-      name: "",
-      description: "",
-      images: [],
-      attribute_values: {},
-    });
+    setForm({ name: "", description: "", images: [], attribute_values: {} });
     fetchAttributeBundle();
     setShowModal(true);
   };
@@ -108,9 +151,11 @@ export default function CategoryProducts({ category, onBack }) {
     setSearch("");
   };
 
+  // Upload Image (with UX messages)
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    showModalMessage("Uploading Image...", "loading");
 
     const formData = new FormData();
     formData.append("image", file);
@@ -121,14 +166,15 @@ export default function CategoryProducts({ category, onBack }) {
         { method: "POST", body: formData }
       );
       const data = await res.json();
+
       if (data.success && data.url) {
-        setForm((f) => ({
-          ...f,
-          images: [...f.images, { url: data.url }],
-        }));
-      } else alert("Image upload failed.");
+        setForm((f) => ({ ...f, images: [...f.images, { url: data.url }] }));
+        showModalMessage("Image uploaded!", "success");
+      } else {
+        showModalMessage("Upload failed", "error");
+      }
     } catch {
-      alert("Image upload error.");
+      showModalMessage("Upload error", "error");
     }
   };
 
@@ -139,8 +185,10 @@ export default function CategoryProducts({ category, onBack }) {
     }));
   };
 
+  // Save or update Product
   const handleSave = async (e) => {
     e.preventDefault();
+    showModalMessage("Saving Product...", "loading");
 
     const payload = {
       name: form.name,
@@ -151,7 +199,7 @@ export default function CategoryProducts({ category, onBack }) {
     };
 
     for (const [aid, val] of Object.entries(form.attribute_values || {})) {
-      if (!val || val === "") continue;
+      if (!val) continue;
       const isNum = /^\d+$/.test(val);
       payload.attribute_values.push({
         attribute_id: parseInt(aid),
@@ -171,16 +219,24 @@ export default function CategoryProducts({ category, onBack }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+
     const data = await res.json();
 
     if (data.success) {
-      setShowModal(false);
+      showModalMessage("Saved Successfully!", "success");
+      setTimeout(() => setShowModal(false), 400);
       fetchProducts();
-    } else alert(data.message || "Save failed.");
+    } else {
+      showModalMessage(data.message || "Save failed.", "error");
+    }
   };
 
+  // Delete
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this product?")) return;
+
+    showMessage("Deleting...", "loading");
+
     const res = await fetch(
       "https://bansaltimber.com/api/products/delete_product.php",
       {
@@ -189,17 +245,32 @@ export default function CategoryProducts({ category, onBack }) {
         body: JSON.stringify({ id }),
       }
     );
+
     const data = await res.json();
-    if (data.success) fetchProducts();
+    if (data.success) {
+      showMessage("Deleted!", "success");
+      fetchProducts();
+    } else showMessage("Delete failed", "error");
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+
+      {/* GLOBAL UX MESSAGE */}
+      {message && (
+        <div
+          className={`border text-center font-medium p-2 rounded ${messageClasses[messageType]}`}
+        >
+          {message}
+        </div>
+      )}
+
+      {/* HEADER */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-800 tracking-tight">
           {category.name} Products
         </h1>
+
         <div className="space-x-3">
           <button
             onClick={onBack}
@@ -216,7 +287,7 @@ export default function CategoryProducts({ category, onBack }) {
         </div>
       </div>
 
-      {/* Search + Filters */}
+      {/* FILTER UI */}
       <div className="bg-white shadow rounded-2xl p-4 space-y-4">
         <div className="flex gap-3">
           <input
@@ -226,12 +297,14 @@ export default function CategoryProducts({ category, onBack }) {
             onChange={(e) => setSearch(e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 w-full md:w-64"
           />
+
           <button
             onClick={fetchProducts}
             className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg border"
           >
             Search
           </button>
+
           <button
             onClick={resetFilters}
             className="text-sm text-gray-600 hover:text-gray-800 underline"
@@ -240,22 +313,20 @@ export default function CategoryProducts({ category, onBack }) {
           </button>
         </div>
 
-        {attributes.length > 0 && (
+        {filterAttributes.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {attributes.map((attr) => (
+            {filterAttributes.map((attr) => (
               <div key={attr.id} className="flex flex-col">
                 <label className="text-sm font-medium text-gray-700 mb-1">
                   {attr.name}
                 </label>
+
                 <select
                   value={filters[attr.id] || ""}
-                  onChange={(e) =>
-                    handleFilterChange(attr.id, e.target.value)
-                  }
+                  onChange={(e) => handleFilterChange(attr.id, e.target.value)}
                   className="border border-gray-300 rounded-lg px-3 py-2 text-gray-700"
                 >
                   <option value="">All {attr.name}</option>
-                  {/* ✅ FIX: ensure unique keys for options */}
                   {(attr.options || []).map((opt, i) => (
                     <option
                       key={opt.option_id ?? `${attr.id}-${i}`}
@@ -271,67 +342,49 @@ export default function CategoryProducts({ category, onBack }) {
         )}
       </div>
 
-      {/* Products Table */}
+      {/* TABLE */}
       <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl overflow-hidden border border-gray-100">
         {loading ? (
           <p className="p-6 text-gray-500">Loading products...</p>
         ) : products.length === 0 ? (
-          <p className="p-6 text-gray-500 text-center">
-            No products found in this category.
-          </p>
+          <p className="p-6 text-gray-500 text-center">No products found.</p>
         ) : (
           <table className="min-w-full border-collapse">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 border-b">
-                  ID
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 border-b">
-                  Image
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 border-b">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 border-b">
-                  Description
-                </th>
-                <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700 border-b">
-                  Actions
-                </th>
+                <th className="px-6 py-3 text-left">ID</th>
+                <th className="px-6 py-3 text-left">Image</th>
+                <th className="px-6 py-3 text-left">Name</th>
+                <th className="px-6 py-3 text-left">Description</th>
+                <th className="px-6 py-3 text-right">Actions</th>
               </tr>
             </thead>
+
             <tbody>
               {products.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-3 border-b text-sm text-gray-700">
-                    {p.id}
-                  </td>
+                <tr key={p.id} className="hover:bg-gray-50 transition">
+                  <td className="px-6 py-3 border-b">{p.id}</td>
                   <td className="px-6 py-3 border-b">
                     <img
-                      src={
-                        p.images?.[0] ||
-                        "https://bansaltimber.com/uploads/dummy.jpg"
-                      }
+                      src={cleanImageUrl(p.images?.[0])}
                       alt={p.name}
-                      className="w-14 h-14 object-cover rounded-lg border border-gray-200 shadow-sm"
+                      className="w-14 h-14 object-cover rounded-lg"
                     />
                   </td>
-                  <td className="px-6 py-3 border-b text-sm font-medium text-gray-800">
-                    {p.name}
-                  </td>
-                  <td className="px-6 py-3 border-b text-sm text-gray-600 max-w-[300px] truncate">
+                  <td className="px-6 py-3 border-b font-medium">{p.name}</td>
+                  <td className="px-6 py-3 border-b text-sm max-w-[300px] truncate">
                     {p.description || "—"}
                   </td>
                   <td className="px-6 py-3 border-b text-right space-x-3">
                     <button
                       onClick={() => openEditModal(p)}
-                      className="text-blue-500 hover:text-blue-700 font-medium"
+                      className="text-blue-500 hover:text-blue-800"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(p.id)}
-                      className="text-red-500 hover:text-red-700 font-medium"
+                      className="text-red-500 hover:text-red-800"
                     >
                       Delete
                     </button>
@@ -343,52 +396,57 @@ export default function CategoryProducts({ category, onBack }) {
         )}
       </div>
 
-      {/* Add/Edit Product Modal */}
+      {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999]">
-          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fadeIn">
-            {/* Header */}
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden">
+
+            {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b bg-gray-50">
-              <h2 className="text-lg font-semibold text-gray-800">
+              <h2 className="text-lg font-semibold">
                 {editing ? "Edit Product" : "Add Product"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-500 hover:text-gray-800 text-2xl leading-none"
+                className="text-gray-500 text-2xl leading-none hover:text-gray-800"
               >
                 &times;
               </button>
             </div>
 
-            {/* Form */}
+            {/* MODAL MESSAGE */}
+            {modalMessage && (
+              <div
+                className={`border text-center font-medium p-2 ${messageClasses[modalMessageType]}`}
+              >
+                {modalMessage}
+              </div>
+            )}
+
             <form onSubmit={handleSave} className="p-6 space-y-6">
+
+              {/* Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Product Name
-                </label>
+                <label className="block font-medium mb-1">Product Name</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Block Board 8x4 ft"
                   value={form.name}
-                  onChange={(e) =>
-                    setForm({ ...form, name: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-orange-500"
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full border rounded-xl p-3"
                 />
               </div>
 
+              {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+                <label className="block font-medium mb-1">Description</label>
                 <textarea
                   rows={3}
                   value={form.description}
                   onChange={(e) =>
                     setForm({ ...form, description: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-xl p-3 focus:ring-2 focus:ring-orange-500"
+                  className="w-full border rounded-xl p-3"
                 />
               </div>
 
@@ -396,16 +454,15 @@ export default function CategoryProducts({ category, onBack }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {attributes.map((attr) => (
                   <div key={attr.id}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block font-medium mb-1">
                       {attr.name}
                     </label>
-
                     {attr.is_default ? (
                       <input
                         type="text"
-                        value={attr.default_value || ""}
                         disabled
-                        className="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-100 text-gray-600"
+                        value={attr.default_value}
+                        className="w-full border rounded-xl p-2 bg-gray-100"
                       />
                     ) : (
                       <select
@@ -419,7 +476,7 @@ export default function CategoryProducts({ category, onBack }) {
                             },
                           }))
                         }
-                        className="w-full border border-gray-300 rounded-xl p-2.5 focus:ring-2 focus:ring-orange-500"
+                        className="w-full border rounded-xl p-2"
                       >
                         <option value="">Select {attr.name}</option>
                         {(attr.options || []).map((opt, i) => (
@@ -438,34 +495,29 @@ export default function CategoryProducts({ category, onBack }) {
 
               {/* Images */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Images
-                </label>
+                <label className="block font-medium mb-2">Product Images</label>
+
                 <div className="flex flex-wrap gap-4">
                   {form.images.map((img, i) => (
                     <div
                       key={i}
-                      className="relative group w-28 h-28 rounded-xl overflow-hidden border border-gray-200 shadow-sm"
+                      className="relative w-28 h-28 rounded-xl overflow-hidden border shadow group"
                     >
                       <img
-                        src={
-                          img.url?.startsWith("http")
-                            ? img.url
-                            : `https://bansaltimber.com/uploads/${img.url}`
-                        } // ✅ FIX: normalize image src
-                        alt="preview"
+                        src={cleanImageUrl(img.url)}
                         className="w-full h-full object-cover"
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(i)}
-                        className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition"
+                        className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100"
                       >
                         ×
                       </button>
                     </div>
                   ))}
-                  <label className="cursor-pointer flex flex-col items-center justify-center w-28 h-28 border-2 border-dashed border-gray-300 rounded-xl hover:border-orange-400 hover:bg-orange-50 transition">
+
+                  <label className="cursor-pointer flex items-center justify-center w-28 h-28 border-2 border-dashed rounded-xl hover:border-orange-500 hover:bg-orange-50">
                     <span className="text-gray-500 text-sm">+ Upload</span>
                     <input
                       type="file"
@@ -477,21 +529,22 @@ export default function CategoryProducts({ category, onBack }) {
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end gap-3 pt-4 border-t">
+              <div className="flex justify-end gap-3 border-t pt-4">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-5 py-2 border border-gray-300 rounded-xl hover:bg-gray-100 transition"
+                  className="px-5 py-2 border rounded-xl hover:bg-gray-100"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-xl shadow-md transition"
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-xl"
                 >
-                  {editing ? "Update Product" : "Add Product"}
+                  {editing ? "Update" : "Save"}
                 </button>
               </div>
+
             </form>
           </div>
         </div>

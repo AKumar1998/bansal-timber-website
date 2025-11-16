@@ -4,7 +4,7 @@ export default function HomeIntroProducts() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch("https://bansaltimber.com/api/get_home_intro_products.php")
+    fetch("https://bansaltimber.com/api/home-intro-products/get_home_intro_products.php")
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setProducts(data.products);

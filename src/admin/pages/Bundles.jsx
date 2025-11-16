@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // ✅ Added for navigation
+import { useNavigate } from "react-router-dom";
 
 export default function Bundles() {
   const [bundles, setBundles] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(false);
+
   const [form, setForm] = useState({
     id: null,
     category_id: "",
@@ -14,13 +16,53 @@ export default function Bundles() {
     description: "",
   });
 
-  const navigate = useNavigate(); // ✅ React Router navigation
+  const navigate = useNavigate();
 
-  // ------------------------------------------
-  // Fetch all bundles
-  // ------------------------------------------
+  // ------------------------------------------------------------
+  // UX message (Style: C, Placement: C)
+  // ------------------------------------------------------------
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // loading | success | error
+
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalMessageType, setModalMessageType] = useState("");
+
+  const showMessage = (text, type) => {
+    setMessage(text);
+    setMessageType(type);
+
+    if (type !== "loading") {
+      setTimeout(() => {
+        setMessage("");
+        setMessageType("");
+      }, 2500);
+    }
+  };
+
+  const showModalMessage = (text, type) => {
+    setModalMessage(text);
+    setModalMessageType(type);
+
+    if (type !== "loading") {
+      setTimeout(() => {
+        setModalMessage("");
+        setModalMessageType("");
+      }, 2500);
+    }
+  };
+
+  const messageClasses = {
+    loading: "bg-blue-100 text-blue-700 border-blue-300",
+    success: "bg-green-100 text-green-700 border-green-300",
+    error: "bg-red-100 text-red-700 border-red-300",
+  };
+
+  // ------------------------------------------------------------
+  // Fetch bundles
+  // ------------------------------------------------------------
   const fetchBundles = () => {
     setLoading(true);
+
     fetch("https://bansaltimber.com/api/products/get_categories.php")
       .then((res) => res.json())
       .then((data) => {
@@ -40,6 +82,7 @@ export default function Bundles() {
           const validBundles = bundleResults
             .filter((b) => b.success && b.bundle)
             .map((b) => b.bundle);
+
           setBundles(validBundles);
           setLoading(false);
         });
@@ -51,9 +94,9 @@ export default function Bundles() {
     fetchBundles();
   }, []);
 
-  // ------------------------------------------
+  // ------------------------------------------------------------
   // Modal Logic
-  // ------------------------------------------
+  // ------------------------------------------------------------
   const openAddModal = () => {
     setEditing(false);
     setForm({
@@ -78,6 +121,7 @@ export default function Bundles() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    showModalMessage("Saving bundle...", "loading");
 
     const apiUrl = editing
       ? "https://bansaltimber.com/api/products/update_bundle.php"
@@ -90,16 +134,26 @@ export default function Bundles() {
     });
 
     const data = await res.json();
+
     if (data.success) {
-      setShowModal(false);
-      fetchBundles();
+      showModalMessage(
+        editing ? "Bundle updated!" : "Bundle added!",
+        "success"
+      );
+      setTimeout(() => {
+        setShowModal(false);
+        fetchBundles();
+      }, 500);
     } else {
-      alert(data.message || "Error saving bundle");
+      showModalMessage(data.message || "Failed to save bundle", "error");
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this bundle? This will remove all attributes.")) return;
+    if (!window.confirm("Delete this bundle? This will remove all attributes."))
+      return;
+
+    showMessage("Deleting...", "loading");
 
     const res = await fetch(
       "https://bansaltimber.com/api/products/delete_bundle.php",
@@ -111,15 +165,31 @@ export default function Bundles() {
     );
 
     const data = await res.json();
-    if (data.success) fetchBundles();
+
+    if (data.success) {
+      showMessage("Deleted!", "success");
+      fetchBundles();
+    } else {
+      showMessage("Failed to delete", "error");
+    }
   };
 
-  // ------------------------------------------
+  // ------------------------------------------------------------
   // Render
-  // ------------------------------------------
+  // ------------------------------------------------------------
   return (
     <div className="space-y-6">
-      {/* Header */}
+
+      {/* GLOBAL MESSAGE */}
+      {message && (
+        <div
+          className={`border text-center font-medium p-2 rounded ${messageClasses[messageType]}`}
+        >
+          {message}
+        </div>
+      )}
+
+      {/* HEADER */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-800">
           Attribute Bundles
@@ -132,7 +202,7 @@ export default function Bundles() {
         </button>
       </div>
 
-      {/* Table */}
+      {/* TABLE */}
       <div className="bg-white shadow rounded-2xl overflow-hidden">
         {loading ? (
           <p className="p-6 text-gray-500">Loading bundles...</p>
@@ -142,19 +212,19 @@ export default function Bundles() {
           <table className="min-w-full border-collapse">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 border-b">
+                <th className="px-6 py-3 text-left text-sm font-semibold border-b">
                   ID
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 border-b">
+                <th className="px-6 py-3 text-left text-sm font-semibold border-b">
                   Bundle Name
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 border-b">
+                <th className="px-6 py-3 text-left text-sm font-semibold border-b">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 border-b">
+                <th className="px-6 py-3 text-left text-sm font-semibold border-b">
                   Created
                 </th>
-                <th className="px-6 py-3 text-right text-sm font-semibold text-gray-700 border-b">
+                <th className="px-6 py-3 text-right text-sm font-semibold border-b">
                   Actions
                 </th>
               </tr>
@@ -163,38 +233,33 @@ export default function Bundles() {
               {bundles.map((b) => {
                 const category = categories.find((c) => c.id === b.category_id);
                 return (
-                  <tr key={b.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-3 border-b text-sm text-gray-700">
-                      {b.id}
-                    </td>
-                    <td className="px-6 py-3 border-b text-sm text-gray-800 font-medium">
-                      {b.name}
-                    </td>
-                    <td className="px-6 py-3 border-b text-sm text-gray-600">
+                  <tr key={b.id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-3 border-b">{b.id}</td>
+                    <td className="px-6 py-3 border-b font-medium">{b.name}</td>
+                    <td className="px-6 py-3 border-b">
                       {category ? category.name : "—"}
                     </td>
-                    <td className="px-6 py-3 border-b text-sm text-gray-500">
+                    <td className="px-6 py-3 border-b text-gray-500">
                       {b.created_at
                         ? new Date(b.created_at).toLocaleDateString()
                         : "—"}
                     </td>
                     <td className="px-6 py-3 border-b text-right space-x-3">
-                      {/* ✅ Updated Manage Button */}
                       <button
-                        onClick={() => navigate(`/admin/bundles/${b.id}`)} // 👈 go to BundleEditor
-                        className="text-blue-500 hover:text-blue-700 font-medium"
+                        onClick={() => navigate(`/admin/bundles/${b.id}`)}
+                        className="text-blue-500 hover:text-blue-700"
                       >
                         Manage
                       </button>
                       <button
                         onClick={() => openEditModal(b)}
-                        className="text-gray-700 hover:text-gray-900 font-medium"
+                        className="text-gray-700 hover:text-gray-900"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(b.id)}
-                        className="text-red-500 hover:text-red-700 font-medium"
+                        className="text-red-500 hover:text-red-700"
                       >
                         Delete
                       </button>
@@ -207,24 +272,34 @@ export default function Bundles() {
         )}
       </div>
 
-      {/* Modal */}
+      {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999]">
           <div className="relative bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">
             <button
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl leading-none"
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl"
             >
               &times;
             </button>
+
             <h2 className="text-xl font-semibold mb-4">
               {editing ? "Edit Bundle" : "Add Bundle"}
             </h2>
 
+            {/* MODAL MESSAGE */}
+            {modalMessage && (
+              <div
+                className={`border text-center font-medium p-2 mb-3 rounded ${messageClasses[modalMessageType]}`}
+              >
+                {modalMessage}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
+
               <select
                 required
-                disabled={editing}
                 value={form.category_id}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, category_id: e.target.value }))
@@ -243,9 +318,7 @@ export default function Bundles() {
                 type="text"
                 placeholder="Bundle Name"
                 value={form.name}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, name: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                 required
                 className="w-full border p-2 rounded"
               />
@@ -259,7 +332,7 @@ export default function Bundles() {
                 className="w-full border p-2 rounded h-20"
               />
 
-              <div className="flex justify-end space-x-3">
+              <div className="flex justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
@@ -269,11 +342,12 @@ export default function Bundles() {
                 </button>
                 <button
                   type="submit"
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded"
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded"
                 >
                   {editing ? "Update" : "Save"}
                 </button>
               </div>
+
             </form>
           </div>
         </div>

@@ -3,10 +3,14 @@ import { NavLink } from "react-router-dom";
 export default function Sidebar() {
   const links = [
     { name: "Dashboard", path: "/admin", icon: "📊" },
-    { name: "Products", path: "/admin/products", icon: "📦" },
+    { name: "Categories & Products", path: "/admin/products", icon: "📦" },
     { name: "Blogs", path: "/admin/blogs", icon: "📝" },
     { name: "Bundles", path: "/admin/bundles", icon: "🗂️" },
     { name: "Testimonials", path: "/admin/testimonials", icon: "💬" },
+    { name: "Footer", path: "/admin/footerInfo", icon: "💬" },
+    { name: "Products Page Intro", path: "/admin/productsIntroAdmin", icon: "💬" },
+    { name: "Home Intro Products", path: "/admin/homeIntroProductsAdmin", icon: "💬" },
+    { name: "Founder Section", path: "/admin/founderSection", icon: "💬" },
   ];
 
   return (

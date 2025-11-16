@@ -5,7 +5,7 @@ export default function ProductsIntro() {
   const [introData, setIntroData] = useState(null);
 
   useEffect(() => {
-    fetch("https://bansaltimber.com/api/get_products_intro.php")
+    fetch("https://bansaltimber.com/api/products-intro/get_products_intro.php")
       .then((res) => res.json())
       .then((data) => {
         console.log("Products Intro response:", data);
@@ -15,14 +15,6 @@ export default function ProductsIntro() {
         } else {
           console.warn("❌ data.success is false");
         }
-      })
-      .catch((err) => console.error("Error fetching products intro:", err));
-  }, []);
-  useEffect(() => {
-    fetch("https://bansaltimber.com/api/get_products_intro.php")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setIntroData(data.data);
       })
       .catch((err) => console.error("Error fetching products intro:", err));
   }, []);

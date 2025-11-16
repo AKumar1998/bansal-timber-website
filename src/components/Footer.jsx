@@ -14,7 +14,7 @@ export default function Footer() {
   ];
 
   useEffect(() => {
-    fetch("https://bansaltimber.com/api/get_footer_info.php")
+    fetch("https://bansaltimber.com/api/footer/get_footer_info.php")
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setFooterInfo(data.data);

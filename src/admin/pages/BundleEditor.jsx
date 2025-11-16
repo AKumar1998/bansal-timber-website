@@ -7,8 +7,16 @@ export default function BundleEditor() {
 
   const [bundle, setBundle] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Attribute Modal
   const [showAttrModal, setShowAttrModal] = useState(false);
   const [editingAttr, setEditingAttr] = useState(null);
+
+  // Option Modal
+  const [showOptionModal, setShowOptionModal] = useState(false);
+  const [optionAttributeId, setOptionAttributeId] = useState(null);
+  const [newOptionValue, setNewOptionValue] = useState("");
+
   const [attrForm, setAttrForm] = useState({
     name: "",
     input_type: "select",
@@ -16,28 +24,53 @@ export default function BundleEditor() {
     required: 1,
   });
 
-  // ------------------------------------------
-  // Fetch bundle and attributes
-  // ------------------------------------------
+  // ---------------------------------------------------------
+  // Fetch Bundle
+  // ---------------------------------------------------------
   const fetchBundle = () => {
     setLoading(true);
-    fetch(`https://bansaltimber.com/api/products/get_bundle.php?category_id=${bundleId}`)
+
+    const id = parseInt(bundleId, 10);
+    if (!id || isNaN(id)) {
+      alert("Invalid ID.");
+      setLoading(false);
+      return;
+    }
+
+    const tryByBundleId = `https://bansaltimber.com/api/products/get_bundle.php?bundle_id=${id}&t=${Date.now()}`;
+    const tryByCategoryId = `https://bansaltimber.com/api/products/get_bundle.php?category_id=${id}&t=${Date.now()}`;
+
+    fetch(tryByBundleId)
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) setBundle(data.bundle);
-        else alert("Failed to fetch bundle details.");
+        if (data.success && data.bundle) {
+          setBundle(data.bundle);
+        } else {
+          fetch(tryByCategoryId)
+            .then((r) => r.json())
+            .then((d) => {
+              if (d.success && d.bundle) {
+                setBundle(d.bundle);
+              } else {
+                setBundle(null);
+              }
+            });
+        }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setLoading(false);
+        alert("Network error fetching bundle details.");
+      });
   };
 
   useEffect(() => {
     fetchBundle();
   }, [bundleId]);
 
-  // ------------------------------------------
-  // Attribute Modals
-  // ------------------------------------------
+  // ---------------------------------------------------------
+  // Attribute Logic
+  // ---------------------------------------------------------
   const openAddAttrModal = () => {
     setEditingAttr(null);
     setAttrForm({
@@ -84,7 +117,9 @@ export default function BundleEditor() {
     if (data.success) {
       setShowAttrModal(false);
       fetchBundle();
-    } else alert(data.message || "Error saving attribute.");
+    } else {
+      alert(data.message || "Error saving attribute.");
+    }
   };
 
   const handleDeleteAttribute = async (id) => {
@@ -98,27 +133,45 @@ export default function BundleEditor() {
         body: JSON.stringify({ id }),
       }
     );
+
     const data = await res.json();
     if (data.success) fetchBundle();
   };
 
-  // ------------------------------------------
-  // Options Logic
-  // ------------------------------------------
-  const handleAddOption = async (attribute_id) => {
-    const value = prompt("Enter new option value:");
-    if (!value) return;
+  // ---------------------------------------------------------
+  // Option Logic — New proper modal (no prompt)
+  // ---------------------------------------------------------
+  const openAddOptionModal = (attribute_id) => {
+    setOptionAttributeId(attribute_id);
+    setNewOptionValue("");
+    setShowOptionModal(true);
+  };
+
+  const handleSaveOption = async () => {
+    if (!newOptionValue.trim()) {
+      alert("Option value cannot be empty.");
+      return;
+    }
 
     const res = await fetch(
       "https://bansaltimber.com/api/products/add_bundle_option.php",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ attribute_id, value }),
+        body: JSON.stringify({
+          attribute_id: optionAttributeId,
+          value: newOptionValue.trim(),
+        }),
       }
     );
+
     const data = await res.json();
-    if (data.success) fetchBundle();
+    if (data.success) {
+      setShowOptionModal(false);
+      fetchBundle();
+    } else {
+      alert("Error adding option.");
+    }
   };
 
   const handleDeleteOption = async (id) => {
@@ -135,9 +188,9 @@ export default function BundleEditor() {
     if (data.success) fetchBundle();
   };
 
-  // ------------------------------------------
-  // Default (Common) Values
-  // ------------------------------------------
+  // ---------------------------------------------------------
+  // Default Value Logic
+  // ---------------------------------------------------------
   const handleDefaultChange = async (attribute_id, newValue) => {
     const payload = { attribute_id, value_text: newValue };
 
@@ -154,9 +207,9 @@ export default function BundleEditor() {
     if (data.success) fetchBundle();
   };
 
-  // ------------------------------------------
+  // ---------------------------------------------------------
   // Render
-  // ------------------------------------------
+  // ---------------------------------------------------------
   if (loading)
     return <p className="text-gray-500 p-6">Loading bundle details...</p>;
   if (!bundle)
@@ -202,20 +255,19 @@ export default function BundleEditor() {
                 </th>
               </tr>
             </thead>
+
             <tbody>
               {bundle.attributes.map((attr) => (
                 <tr key={attr.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-3 border-b text-sm text-gray-800 font-medium">
-                    {attr.name}
-                  </td>
-                  <td className="px-6 py-3 border-b text-sm text-gray-600">
-                    {attr.input_type}
-                  </td>
+                  <td className="px-6 py-3 border-b">{attr.name}</td>
+                  <td className="px-6 py-3 border-b">{attr.input_type}</td>
                   <td className="px-6 py-3 border-b text-center">
-                    {attr.is_common ? "✅" : "❌"}
+                    {attr.is_common ? "✔️" : "—"}
                   </td>
-                  <td className="px-6 py-3 border-b text-sm text-gray-700">
-                    {attr.input_type === "select" ? (
+
+                  <td className="px-6 py-3 border-b">
+                    {/* Select type */}
+                    {attr.input_type === "select" && (
                       <div className="space-y-1">
                         {(attr.options || []).map((opt) => (
                           <div
@@ -231,37 +283,53 @@ export default function BundleEditor() {
                             </button>
                           </div>
                         ))}
+
                         <button
-                          onClick={() => handleAddOption(attr.id)}
+                          onClick={() => openAddOptionModal(attr.id)}
                           className="text-xs text-blue-500 hover:text-blue-700"
                         >
                           + Add Option
                         </button>
                       </div>
-                    ) : attr.is_common ? (
-                      <input
-                        type="text"
-                        className="border border-gray-300 rounded px-2 py-1 w-full"
-                        placeholder="Set default value"
-                        defaultValue={attr.default_value || ""}
-                        onBlur={(e) =>
-                          handleDefaultChange(attr.id, e.target.value)
-                        }
-                      />
-                    ) : (
-                      <span className="text-gray-400 italic">—</span>
+                    )}
+
+                    {/* Default value (common) */}
+                    {attr.input_type === "text" && attr.is_common === 1 && (
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          className="border p-2 rounded w-full"
+                          defaultValue={attr.default_value || ""}
+                          onChange={(e) => {
+                            attr.__pendingDefault = e.target.value;
+                          }}
+                        />
+                        <button
+                          onClick={() =>
+                            handleDefaultChange(attr.id, attr.__pendingDefault || "")
+                          }
+                          className="px-3 py-1 text-xs rounded bg-blue-500 text-white hover:bg-blue-600"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    )}
+
+                    {attr.input_type === "text" && !attr.is_common && (
+                      <span className="text-gray-400 text-sm">—</span>
                     )}
                   </td>
+
                   <td className="px-6 py-3 border-b text-right space-x-3">
                     <button
                       onClick={() => openEditAttrModal(attr)}
-                      className="text-blue-500 hover:text-blue-700 font-medium"
+                      className="text-blue-500 hover:text-blue-700"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteAttribute(attr.id)}
-                      className="text-red-500 hover:text-red-700 font-medium"
+                      className="text-red-500 hover:text-red-700"
                     >
                       Delete
                     </button>
@@ -271,8 +339,8 @@ export default function BundleEditor() {
             </tbody>
           </table>
         ) : (
-          <p className="p-6 text-gray-500 text-center">
-            No attributes found for this bundle.
+          <p className="p-6 text-center text-gray-500">
+            This Bundle is empty. Add your first attribute to begin.
           </p>
         )}
       </div>
@@ -281,7 +349,7 @@ export default function BundleEditor() {
       <div className="flex justify-end">
         <button
           onClick={openAddAttrModal}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl shadow-lg transition-all"
+          className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl shadow-lg"
         >
           + Add Attribute
         </button>
@@ -293,10 +361,11 @@ export default function BundleEditor() {
           <div className="relative bg-white p-6 rounded-2xl shadow-lg w-full max-w-md">
             <button
               onClick={() => setShowAttrModal(false)}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl leading-none"
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl"
             >
-              &times;
+              ×
             </button>
+
             <h2 className="text-xl font-semibold mb-4">
               {editingAttr ? "Edit Attribute" : "Add Attribute"}
             </h2>
@@ -348,12 +417,52 @@ export default function BundleEditor() {
                 </button>
                 <button
                   type="submit"
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded"
+                  className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
                 >
                   {editingAttr ? "Update" : "Save"}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Option Modal */}
+      {showOptionModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999]">
+          <div className="relative bg-white p-6 rounded-2xl shadow-lg w-full max-w-sm">
+            <button
+              onClick={() => setShowOptionModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl"
+            >
+              ×
+            </button>
+
+            <h2 className="text-lg font-semibold mb-4">Add Option</h2>
+
+            <input
+              type="text"
+              placeholder="Option value"
+              value={newOptionValue}
+              onChange={(e) => setNewOptionValue(e.target.value)}
+              className="w-full border p-2 rounded mb-4"
+            />
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowOptionModal(false)}
+                className="px-4 py-2 border rounded"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleSaveOption}
+                className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
+              >
+                Save
+              </button>
+            </div>
           </div>
         </div>
       )}

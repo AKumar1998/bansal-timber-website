@@ -12,6 +12,13 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Reading Time calc
+  const getReadingTime = (html) => {
+    const text = html.replace(/<[^>]+>/g, " ");
+    const words = text.trim().split(/\s+/).length;
+    return Math.ceil(words / 200);
+  };
+
   useEffect(() => {
     async function fetchBlog() {
       try {
@@ -33,6 +40,31 @@ export default function BlogPage() {
     fetchBlog();
   }, [slug]);
 
+  // Inject SEO tags
+  useEffect(() => {
+    if (!blog) return;
+
+    document.title = blog.meta_title || blog.title;
+
+    const desc = blog.meta_description || blog.excerpt || "";
+
+    let descTag = document.querySelector("meta[name='description']");
+    if (!descTag) {
+      descTag = document.createElement("meta");
+      descTag.name = "description";
+      document.head.appendChild(descTag);
+    }
+    descTag.content = desc;
+
+    let canonical = document.querySelector("link[rel='canonical']");
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      document.head.appendChild(canonical);
+    }
+    canonical.href = `https://bansaltimber.com/blogs/${blog.slug}`;
+  }, [blog]);
+
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-screen text-lg">
@@ -51,14 +83,27 @@ export default function BlogPage() {
     <div className="bg-white text-gray-900">
       <Navbar />
 
-      {/* Hero: add top margin so it's not behind navbar */}
       <div className="mt-20 md:mt-32">
         <BlogHero title={blog.title} />
       </div>
 
       <MainContainer>
+
         <article className="prose max-w-none lg:prose-lg prose-img:rounded-xl prose-headings:font-semibold mt-8 md:mt-12">
-          {/* Blog featured image */}
+
+          {/* Metadata First */}
+          <div className="text-sm text-gray-500 mb-4">
+            Published on{" "}
+            {new Date(blog.published_at).toLocaleDateString("en-IN", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+            {" • "}
+            {getReadingTime(blog.body)} min read
+          </div>
+
+          {/* Featured Image */}
           {blog.image && (
             <img
               src={blog.image}
@@ -70,25 +115,12 @@ export default function BlogPage() {
           {/* Excerpt */}
           <p className="text-gray-500 italic mb-6">{blog.excerpt}</p>
 
-          {/* Body (main content) */}
-          <div
-            className="mt-4 space-y-6"
-            dangerouslySetInnerHTML={{ __html: blog.body }}
-          />
-
-          {/* Metadata */}
-          <div className="mt-8 text-sm text-gray-400">
-            Published on:{" "}
-            {new Date(blog.published_at).toLocaleDateString("en-IN", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </div>
+          {/* Body */}
+          <div className="mt-4 space-y-6" dangerouslySetInnerHTML={{ __html: blog.body }} />
         </article>
+
       </MainContainer>
 
-      {/* Banner above footer */}
       <MainContainer>
         <div className="mt-12">
           <BlogPageBanner />

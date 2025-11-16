@@ -6,6 +6,7 @@ export default function Testimonials() {
   const [showModal, setShowModal] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState(null);
   const [sortOption, setSortOption] = useState("newest");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -14,6 +15,34 @@ export default function Testimonials() {
     image_id: "",
     image: "",
   });
+
+  // Message system
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // loading | success | error
+
+  const showMessage = (text, type) => {
+    setMessage(text);
+    setMessageType(type);
+
+    if (type !== "loading") {
+      setTimeout(() => {
+        setMessage("");
+        setMessageType("");
+      }, 2500);
+    }
+  };
+
+  const messageClasses = {
+    loading: "bg-blue-100 text-blue-700 border-blue-300",
+    success: "bg-green-100 text-green-700 border-green-300",
+    error: "bg-red-100 text-red-700 border-red-300",
+  };
+
+  // Helper to resolve image URL safely
+  const resolveImageUrl = (path) => {
+    if (!path) return "";
+    return path.startsWith("http") ? path : `https://bansaltimber.com${path}`;
+  };
 
   // Fetch testimonials
   const fetchTestimonials = () => {
@@ -40,39 +69,45 @@ export default function Testimonials() {
         return a.name.localeCompare(b.name);
       case "za":
         return b.name.localeCompare(a.name);
-      default: // newest
+      default:
         return new Date(b.created_at) - new Date(a.created_at);
     }
   });
 
-  // Image upload
+  // Upload image
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    showMessage("Uploading image...", "loading");
+
     const formData = new FormData();
     formData.append("image", file);
 
-    const res = await fetch("https://bansaltimber.com/api/testimonials/upload_testimonial_image.php", {
-      method: "POST",
-      body: formData,
-    });
+    const res = await fetch(
+      "https://bansaltimber.com/api/testimonials/upload_testimonial_image.php",
+      { method: "POST", body: formData }
+    );
 
     const data = await res.json();
     if (data.success) {
+      showMessage("Image uploaded successfully!", "success");
       setForm((f) => ({
         ...f,
         image: data.url,
         image_id: data.image_id,
       }));
     } else {
-      alert("Image upload failed.");
+      showMessage("Image upload failed", "error");
     }
   };
 
-  // Add / Update testimonial
+  // Submit add / update
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    showMessage("Saving testimonial...", "loading");
+
     const apiUrl = editingTestimonial
       ? "https://bansaltimber.com/api/testimonials/update_testimonial.php"
       : "https://bansaltimber.com/api/testimonials/add_testimonial.php";
@@ -84,54 +119,19 @@ export default function Testimonials() {
     });
 
     const data = await res.json();
+    setIsSubmitting(false);
+
     if (data.success) {
+      showMessage(editingTestimonial ? "Updated successfully!" : "Added successfully!", "success");
       setShowModal(false);
-      setEditingTestimonial(null);
-      setForm({
-        name: "",
-        project_name: "",
-        testimonial_text: "",
-        image_id: "",
-        image: "",
-      });
+      resetForm();
       fetchTestimonials();
     } else {
-      alert(data.message || "Error saving testimonial.");
+      showMessage(data.message || "Failed to save testimonial.", "error");
     }
   };
 
-  // Edit testimonial
-  const handleEdit = (t) => {
-    setEditingTestimonial(t);
-    setForm({
-      id: t.id,
-      name: t.name,
-      project_name: t.project_name,
-      testimonial_text: t.testimonial_text,
-      image_id: t.image_id || "",
-      image: t.image || "",
-    });
-    setShowModal(true);
-  };
-
-  // Delete testimonial
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this testimonial?")) return;
-
-    const res = await fetch("https://bansaltimber.com/api/testimonials/delete_testimonial.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
-
-    const data = await res.json();
-    if (data.success) fetchTestimonials();
-    else alert("Failed to delete testimonial.");
-  };
-
-  // Close modal
-  const handleCloseModal = () => {
-    setShowModal(false);
+  const resetForm = () => {
     setEditingTestimonial(null);
     setForm({
       name: "",
@@ -142,14 +142,52 @@ export default function Testimonials() {
     });
   };
 
+  const handleEdit = (t) => {
+    setEditingTestimonial(t);
+    setForm({
+      id: t.id,
+      name: t.name,
+      project_name: t.project_name,
+      testimonial_text: t.testimonial_text,
+      image_id: t.image_id || "",
+      image: t.image ? t.image.replace("https://bansaltimber.com", "") : "",
+    });
+    setShowModal(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this testimonial?")) return;
+
+    showMessage("Deleting...", "loading");
+
+    const res = await fetch(
+      "https://bansaltimber.com/api/testimonials/delete_testimonial.php",
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) }
+    );
+
+    const data = await res.json();
+    if (data.success) {
+      showMessage("Deleted successfully!", "success");
+      fetchTestimonials();
+    } else {
+      showMessage("Failed to delete.", "error");
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Global message */}
+      {message && (
+        <div className={`border text-center font-medium p-2 rounded ${messageClasses[messageType]}`}>
+          {message}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <h1 className="text-2xl font-semibold text-gray-800">Manage Testimonials</h1>
 
         <div className="flex items-center gap-3">
-          {/* Sort Dropdown */}
           <select
             className="border p-2 rounded text-gray-700"
             value={sortOption}
@@ -162,7 +200,7 @@ export default function Testimonials() {
           </select>
 
           <button
-            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow"
+            className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded transition"
             onClick={() => setShowModal(true)}
           >
             + Add Testimonial
@@ -170,7 +208,7 @@ export default function Testimonials() {
         </div>
       </div>
 
-      {/* Testimonials Grid */}
+      {/* Grid */}
       {loading ? (
         <p>Loading...</p>
       ) : sortedTestimonials.length === 0 ? (
@@ -178,30 +216,21 @@ export default function Testimonials() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedTestimonials.map((t) => (
-            <div
-              key={t.id}
-              className="bg-white rounded-2xl shadow hover:shadow-lg transition p-4 flex flex-col"
-            >
+            <div key={t.id} className="bg-white rounded-xl shadow hover:shadow-lg transition p-4">
               <img
-                src={t.image || "https://bansaltimber.com/uploads/testimonials/default.jpg"}
+                src={resolveImageUrl(t.image) || "https://bansaltimber.com/uploads/testimonials/default.jpg"}
                 alt={t.name}
-                className="h-40 w-full object-cover rounded-xl mb-4"
+                className="h-40 w-full object-cover rounded-lg mb-4"
               />
-              <h3 className="text-lg font-semibold text-gray-800">{t.name}</h3>
-              <p className="text-sm text-gray-500 mb-2">{t.project_name}</p>
-              <p className="text-sm text-gray-600 line-clamp-3">{t.testimonial_text}</p>
+              <h3 className="font-semibold">{t.name}</h3>
+              <p className="text-sm text-gray-500">{t.project_name}</p>
+              <p className="text-sm text-gray-600 mt-2 line-clamp-3">{t.testimonial_text}</p>
 
-              <div className="flex justify-end space-x-3 mt-4">
-                <button
-                  onClick={() => handleEdit(t)}
-                  className="text-blue-500 hover:text-blue-700 font-medium"
-                >
+              <div className="flex justify-end gap-3 mt-3">
+                <button onClick={() => handleEdit(t)} className="text-blue-600 hover:text-blue-800 font-medium">
                   Edit
                 </button>
-                <button
-                  onClick={() => handleDelete(t.id)}
-                  className="text-red-500 hover:text-red-700 font-medium"
-                >
+                <button onClick={() => handleDelete(t.id)} className="text-red-600 hover:text-red-800 font-medium">
                   Delete
                 </button>
               </div>
@@ -210,27 +239,25 @@ export default function Testimonials() {
         </div>
       )}
 
-      {/* Add/Edit Modal */}
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999]">
-          <div
-            className="relative bg-white p-6 rounded-2xl shadow-lg w-full max-w-xl overflow-y-auto max-h-[90vh]"
-            style={{ pointerEvents: "auto" }}
-          >
-            {/* Close Button */}
+          <div className="relative bg-white p-6 rounded-xl shadow-md w-full max-w-xl max-h-[90vh] overflow-auto">
             <button
-              onClick={handleCloseModal}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl leading-none z-10"
-              type="button"
+              onClick={() => {
+                setShowModal(false);
+                resetForm();
+              }}
+              className="absolute top-3 right-4 text-gray-500 hover:text-gray-900 text-2xl"
             >
               &times;
             </button>
 
-            <h2 className="text-xl font-semibold mb-4">
+            <h2 className="text-lg font-semibold mb-4">
               {editingTestimonial ? "Edit Testimonial" : "Add Testimonial"}
             </h2>
 
-            <form className="space-y-4 relative z-20" onSubmit={handleSubmit}>
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <input
                 type="text"
                 placeholder="Name"
@@ -239,6 +266,7 @@ export default function Testimonials() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
               />
+
               <input
                 type="text"
                 placeholder="Project Name"
@@ -246,6 +274,7 @@ export default function Testimonials() {
                 value={form.project_name}
                 onChange={(e) => setForm({ ...form, project_name: e.target.value })}
               />
+
               <textarea
                 placeholder="Testimonial Text"
                 className="w-full border p-2 rounded min-h-[100px]"
@@ -254,32 +283,37 @@ export default function Testimonials() {
                 required
               />
 
-              {/* Upload Image */}
-              <label className="cursor-pointer inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded shadow">
+              {/* Image Upload + Preview */}
+              <label className="inline-block bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded cursor-pointer">
                 Upload Image
                 <input type="file" className="hidden" onChange={handleFileChange} />
               </label>
+
               {form.image && (
                 <img
-                  src={"https://bansaltimber.com" + form.image}
-                  alt=""
-                  className="h-24 mt-2 rounded"
+                  src={resolveImageUrl(form.image)}
+                  className="h-24 rounded mt-2 border object-cover"
+                  alt="Preview"
                 />
               )}
 
-              <div className="flex justify-end space-x-3 mt-4">
+              <div className="flex justify-end gap-3">
                 <button
                   type="button"
-                  onClick={handleCloseModal}
+                  onClick={() => {
+                    setShowModal(false);
+                    resetForm();
+                  }}
                   className="px-4 py-2 border rounded"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded"
+                  disabled={isSubmitting}
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded disabled:bg-gray-400"
                 >
-                  {editingTestimonial ? "Update" : "Save"}
+                  {isSubmitting ? "Saving..." : editingTestimonial ? "Update" : "Save"}
                 </button>
               </div>
             </form>
