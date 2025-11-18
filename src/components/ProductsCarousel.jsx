@@ -9,9 +9,9 @@ export default function ProductsCarousel() {
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  // ✅ Fetch carousel images
+  // Fetch carousel images
   useEffect(() => {
-    fetch("https://bansaltimber.com/api/get_product_carousel.php")
+    fetch("https://bansaltimber.com/api/product-carousel/get_product_carousel.php")
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.carousel.length > 0) {
@@ -29,7 +29,7 @@ export default function ProductsCarousel() {
   const extendedSlides =
     total > 0 ? [slides[total - 1], ...slides, slides[0]] : [];
 
-  // ✅ Auto-slide
+  // Auto-slide
   useEffect(() => {
     if (total === 0) return;
     clearInterval(intervalRef.current);
@@ -39,7 +39,7 @@ export default function ProductsCarousel() {
     return () => clearInterval(intervalRef.current);
   }, [total]);
 
-  // ✅ Core infinite loop logic (with ref-based snap)
+  // Core infinite loop logic (with ref-based snap)
   useEffect(() => {
     const container = containerRef.current;
     if (!container || total === 0) return;
@@ -75,7 +75,7 @@ export default function ProductsCarousel() {
     }
   }, [isTransitioning]);
 
-  // ✅ Swipe support
+  // Swipe support
   const handleTouchStart = (e) => (touchStartX.current = e.touches[0].clientX);
   const handleTouchMove = (e) => (touchEndX.current = e.touches[0].clientX);
   const handleTouchEnd = () => {
@@ -99,7 +99,7 @@ export default function ProductsCarousel() {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* ✅ Slides container */}
+      {/* Slides container */}
       <div ref={containerRef} className="flex">
         {extendedSlides.map((slide, i) => (
           <div key={i} className="w-full flex-shrink-0">
@@ -113,7 +113,7 @@ export default function ProductsCarousel() {
         ))}
       </div>
 
-      {/* ✅ Dots */}
+      {/* Dots */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-3">
         {slides.map((_, i) => (
           <button

@@ -11,6 +11,10 @@ export default function Blogs() {
   const [editorKey, setEditorKey] = useState(Date.now());
   const [isFetchingSingle, setIsFetchingSingle] = useState(false);
 
+  // Pagination
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
+
   const emptyForm = {
     id: null,
     title: "",
@@ -25,10 +29,8 @@ export default function Blogs() {
     tags: "",
     featured: 0,
   };
-
   const [form, setForm] = useState(emptyForm);
 
-  // -------------------- Messages --------------------
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
   const [modalMessage, setModalMessage] = useState("");
@@ -52,7 +54,7 @@ export default function Blogs() {
     if (type !== "loading") setTimeout(() => setModalMessage(""), 2500);
   };
 
-  // -------------------- Fetch All Blogs --------------------
+  // Fetch Blogs
   const fetchBlogs = () => {
     setLoading(true);
     fetch("https://bansaltimber.com/api/blogs/get_admin_blogs.php")
@@ -66,7 +68,7 @@ export default function Blogs() {
 
   useEffect(() => fetchBlogs(), []);
 
-  // -------------------- Sorting --------------------
+  // Sorting
   const sortedBlogs = [...blogs].sort((a, b) => {
     switch (sortOption) {
       case "oldest": return new Date(a.created_at) - new Date(b.created_at);
@@ -78,10 +80,12 @@ export default function Blogs() {
     }
   });
 
-  // -------------------- Title → Slug --------------------
+  // Paginated Blogs
+  const totalPages = Math.ceil(sortedBlogs.length / pageSize);
+  const paginatedBlogs = sortedBlogs.slice((page - 1) * pageSize, page * pageSize);
+
   const handleTitleChange = (title) => {
     const slug = title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-
     setForm((f) => ({
       ...f,
       title,
@@ -90,18 +94,19 @@ export default function Blogs() {
     }));
   };
 
-  // -------------------- Image Upload --------------------
+  // Upload Image
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     showModalMessage("Uploading image...", "loading");
 
     const formData = new FormData();
     formData.append("image", file);
     if (form.image) formData.append("oldImage", form.image);
 
-    const res = await fetch("https://bansaltimber.com/api/blogs/upload_blog_image.php", { method: "POST", body: formData });
+    const res = await fetch("https://bansaltimber.com/api/blogs/upload_blog_image.php", {
+      method: "POST", body: formData
+    });
     const data = await res.json();
 
     if (data.success) {
@@ -110,7 +115,7 @@ export default function Blogs() {
     } else showModalMessage("Upload failed", "error");
   };
 
-  // -------------------- Edit Blog (Fetch by ID) --------------------
+  // Edit Blog
   const handleEdit = async (blog) => {
     setShowModal(true);
     setIsFetchingSingle(true);
@@ -119,11 +124,9 @@ export default function Blogs() {
     try {
       const res = await fetch(`https://bansaltimber.com/api/blogs/get_blog.php?id=${blog.id}`);
       const data = await res.json();
-
-      if (!data || !data.body) throw new Error("Missing full body");
+      if (!data || !data.body) throw new Error();
 
       setEditingBlog(data);
-
       setForm({
         id: data.id,
         title: data.title,
@@ -142,13 +145,12 @@ export default function Blogs() {
       setEditorKey(Date.now());
       showModalMessage("Loaded!", "success");
     } catch {
-      showModalMessage("Failed to load full blog!", "error");
+      showModalMessage("Failed to load blog", "error");
     }
-
     setIsFetchingSingle(false);
   };
 
-  // -------------------- Submit --------------------
+  // Submit Blog
   const handleSubmit = async (e) => {
     e.preventDefault();
     showModalMessage("Saving...", "loading");
@@ -164,20 +166,17 @@ export default function Blogs() {
     });
 
     const data = await res.json();
-
     if (data.success) {
       showModalMessage(editingBlog ? "Updated!" : "Created!", "success");
       setTimeout(() => {
         closeModal();
         fetchBlogs();
-      }, 700);
+      }, 600);
     } else showModalMessage(data.error || "Failed!", "error");
   };
 
-  // -------------------- Delete --------------------
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this blog?")) return;
-
     showMessage("Deleting...", "loading");
 
     const res = await fetch("https://bansaltimber.com/api/blogs/delete_blog.php", {
@@ -185,13 +184,12 @@ export default function Blogs() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-
     const data = await res.json();
+
     data.success ? showMessage("Deleted!", "success") : showMessage("Failed!", "error");
     fetchBlogs();
   };
 
-  // -------------------- Close Modal --------------------
   const closeModal = () => {
     setShowModal(false);
     setEditingBlog(null);
@@ -200,7 +198,7 @@ export default function Blogs() {
     setEditorKey(Date.now());
   };
 
-  // -------------------- JSX --------------------
+
   return (
     <div className="space-y-6">
 
@@ -215,8 +213,14 @@ export default function Blogs() {
         <h1 className="text-2xl font-semibold text-gray-800">Manage Blogs</h1>
 
         <div className="flex items-center gap-3">
-          <select className="border p-2 rounded text-gray-700" value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}>
+          <select
+            className="border p-2 rounded text-gray-700"
+            value={sortOption}
+            onChange={(e) => {
+              setSortOption(e.target.value);
+              setPage(1); // reset page when sorting changes
+            }}
+          >
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
             <option value="title-az">Title A–Z</option>
@@ -225,67 +229,110 @@ export default function Blogs() {
             <option value="drafts-first">Drafts First</option>
           </select>
 
-          <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow"
+          <button
+            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow"
             onClick={() => {
               setForm(emptyForm);
               setEditingBlog(null);
               setEditorKey(Date.now());
               setShowModal(true);
-            }}>
+            }}
+          >
             + Add Blog
           </button>
         </div>
       </div>
 
-      {/* Blog List */}
-      {loading ? <p>Loading...</p> : sortedBlogs.length === 0 ? (
-        <p>No blogs found.</p>
+      {/* Blog Grid */}
+      {loading ? (
+        <p className="text-gray-500">Loading...</p>
+      ) : paginatedBlogs.length === 0 ? (
+        <p className="text-gray-600">No blogs found.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedBlogs.map((blog) => (
-            <div key={blog.id} className="bg-white rounded-2xl shadow p-4 flex flex-col hover:shadow-lg transition">
-              <img
-                src={blog.image || "https://bansaltimber.com/uploads/blog-images/default.jpg"}
-                alt={blog.title}
-                className="h-40 w-full object-cover rounded-xl mb-4"
-              />
-              <h3 className="text-lg font-semibold text-gray-800">{blog.title}</h3>
-              <p className="text-sm text-gray-600 mt-2 line-clamp-3">{blog.excerpt}</p>
+        <>
+          {/* Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            {paginatedBlogs.map((blog) => (
+              <div key={blog.id} className="bg-white rounded-2xl shadow p-4 flex flex-col hover:shadow-lg transition">
+                <img
+                  src={blog.image || "https://bansaltimber.com/uploads/blog-images/default.jpg"}
+                  alt={blog.title}
+                  className="h-40 w-full object-cover rounded-xl mb-4"
+                />
+                <h3 className="text-lg font-semibold text-gray-800">{blog.title}</h3>
+                <p className="text-sm text-gray-600 mt-2 line-clamp-3">{blog.excerpt}</p>
 
-              <div className="flex items-center justify-between mt-4">
-                {blog.featured === 1 && (
-                  <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded font-medium">
-                    ⭐ Featured
+                <div className="flex items-center justify-between mt-4">
+                  {blog.featured === 1 && (
+                    <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded font-medium">
+                      ⭐ Featured
+                    </span>
+                  )}
+
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    blog.status === "published"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-200 text-gray-700"
+                  }`}>
+                    {blog.status}
                   </span>
-                )}
 
-                <span className={`text-xs px-2 py-1 rounded-full ${
-                  blog.status === "published"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-200 text-gray-700"
-                }`}>
-                  {blog.status}
-                </span>
-
-                <div className="space-x-3">
-                  <button onClick={() => handleEdit(blog)} className="text-blue-500 hover:text-blue-700 font-medium">
-                    Edit
-                  </button>
-                  <button onClick={() => handleDelete(blog.id)} className="text-red-500 hover:text-red-700 font-medium">
-                    Delete
-                  </button>
+                  <div className="space-x-3">
+                    <button onClick={() => handleEdit(blog)} className="text-blue-500 hover:text-blue-700 font-medium">
+                      Edit
+                    </button>
+                    <button onClick={() => handleDelete(blog.id)} className="text-red-500 hover:text-red-700 font-medium">
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          {/* Pagination Bar */}
+          <div className="flex items-center justify-center mt-6 gap-2 select-none">
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+              className={`px-3 py-1 rounded border ${
+                page === 1 ? "opacity-40 cursor-not-allowed" : "hover:bg-gray-100"
+              }`}
+            >
+              Prev
+            </button>
+
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i + 1)}
+                className={`px-3 py-1 rounded border text-sm ${
+                  page === i + 1
+                    ? "bg-orange-500 text-white border-orange-600"
+                    : "hover:bg-gray-100"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => p + 1)}
+              className={`px-3 py-1 rounded border ${
+                page === totalPages ? "opacity-40 cursor-not-allowed" : "hover:bg-gray-100"
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        </>
       )}
 
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999]">
           <div className="relative bg-white p-6 rounded-2xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-
             <button onClick={closeModal} className="absolute top-4 right-4 text-gray-500 text-2xl hover:text-gray-800">&times;</button>
 
             {modalMessage && (
@@ -297,7 +344,6 @@ export default function Blogs() {
             <h2 className="text-xl font-semibold mb-4">{editingBlog ? "Edit Blog" : "Add Blog"}</h2>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
-              
               <label>Title</label>
               <input className="w-full border p-2 rounded" value={form.title} required
                 onChange={(e) => handleTitleChange(e.target.value)} />
@@ -330,18 +376,16 @@ export default function Blogs() {
               <ReactQuill key={editorKey} theme="snow" value={form.body}
                 onChange={(v) => setForm({ ...form, body: v })} />
 
-              
-              {/* ---------------------- Improved Image Upload Section ---------------------- */}
+              {/* Image Upload */}
               <div className="space-y-2 pt-2 border-t mt-2">
                 <p className="font-medium text-gray-700">Upload Featured Image</p>
-
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                   <button
                     type="button"
                     onClick={() => document.getElementById("adminBlogImageInput").click()}
                     className="px-4 py-2 rounded-md border bg-gray-50 hover:bg-gray-100 shadow-sm text-sm font-medium"
                   >
-                    📁 Select Image
+                    Select Image
                   </button>
 
                   <input
@@ -365,8 +409,6 @@ export default function Blogs() {
                   Recommended: 1200×600px • JPG/WebP • Under 400KB
                 </p>
               </div>
-              {/* --------------------------------------------------------------------------- */}
-
 
               <label>Status</label>
               <select className="w-full border p-2 rounded" value={form.status}

@@ -9,9 +9,8 @@ export default function ContactCarousel() {
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  // ✅ Fetch carousel images from backend
   useEffect(() => {
-    fetch("https://bansaltimber.com/api/get_contact_carousel.php")
+    fetch("https://bansaltimber.com/api/contact-carousel/get_contact_carousel.php")
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
@@ -32,7 +31,7 @@ export default function ContactCarousel() {
   const total = slides.length;
   const extendedSlides = total > 0 ? [slides[total - 1], ...slides, slides[0]] : [];
 
-  // ✅ Auto-slide
+  // Auto-slide
   useEffect(() => {
     if (total === 0) return;
     clearInterval(intervalRef.current);
@@ -42,7 +41,7 @@ export default function ContactCarousel() {
     return () => clearInterval(intervalRef.current);
   }, [total]);
 
-  // ✅ Smooth infinite loop using ref-based transition snapping
+  // Smooth infinite loop using ref-based transition snapping
   useEffect(() => {
     const container = containerRef.current;
     if (!container || total === 0) return;
@@ -68,7 +67,7 @@ export default function ContactCarousel() {
     return () => container.removeEventListener("transitionend", handleTransitionEnd);
   }, [index, total, isTransitioning]);
 
-  // ✅ Re-enable transitions after snapping (1 frame later)
+  // Re-enable transitions after snapping (1 frame later)
   useEffect(() => {
     if (!isTransitioning) {
       const id = requestAnimationFrame(() => setIsTransitioning(true));
@@ -76,7 +75,7 @@ export default function ContactCarousel() {
     }
   }, [isTransitioning]);
 
-  // ✅ Swipe gesture
+  // Swipe gesture
   const handleTouchStart = (e) => (touchStartX.current = e.touches[0].clientX);
   const handleTouchMove = (e) => (touchEndX.current = e.touches[0].clientX);
   const handleTouchEnd = () => {
@@ -100,7 +99,7 @@ export default function ContactCarousel() {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* ✅ Slides */}
+      {/* Slides */}
       <div ref={containerRef} className="flex">
         {extendedSlides.map((slide, i) => (
           <div key={i} className="w-full flex-shrink-0">
@@ -114,7 +113,7 @@ export default function ContactCarousel() {
         ))}
       </div>
 
-      {/* ✅ Dots */}
+      {/* Dots */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-3">
         {slides.map((_, i) => (
           <button

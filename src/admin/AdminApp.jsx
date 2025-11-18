@@ -11,6 +11,10 @@ import FooterInfo from "./pages/FooterInfo.jsx";
 import ProductsIntroAdmin from "./pages/ProductsIntroAdmin.jsx";
 import HomeIntroProductsAdmin from "./pages/HomeIntroProductsAdmin.jsx";
 import FounderSection from "./pages/FounderSection.jsx";
+import ContactCarouselAdmin from "./pages/ContactCarouselAdmin.jsx";
+import ProductCarouselAdmin from "./pages/ProductCarouselAdmin.jsx";
+import HeroBanners from "./pages/HeroBanners.jsx";
+import EmailQueries from "./pages/EmailQueries.jsx";
 
 export default function AdminApp() {
   return (
@@ -19,6 +23,7 @@ export default function AdminApp() {
 
       <Route element={<AdminLayout />}>
         <Route index element={<Dashboard />} />
+        <Route path="emailQueries" element={<EmailQueries />} />
         <Route path="products" element={<Products />} />
         <Route path="blogs" element={<Blogs />} />
         <Route path="bundles" element={<Bundles />} />
@@ -28,6 +33,9 @@ export default function AdminApp() {
         <Route path="productsIntroAdmin" element={<ProductsIntroAdmin />} />
         <Route path="homeIntroProductsAdmin" element={<HomeIntroProductsAdmin />} />
         <Route path="founderSection" element={<FounderSection />} />
+        <Route path="contactCarouselAdmin" element={<ContactCarouselAdmin />} />
+        <Route path="productCarouselAdmin" element={<ProductCarouselAdmin />} />
+        <Route path="heroBanners" element={<HeroBanners />} />
       </Route>
     </Routes>
   );

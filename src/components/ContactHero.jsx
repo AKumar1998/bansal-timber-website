@@ -5,7 +5,7 @@ export default function ContactHero() {
   const [hero, setHero] = useState(null);
 
   useEffect(() => {
-    fetch('https://bansaltimber.com/api/get_hero_banner.php?page_name=contact')
+    fetch('https://bansaltimber.com/api/hero-banners/get_hero_banner.php?page_name=contact')
       .then(res => res.json())
       .then(data => {
         if (data.success) setHero(data.data);

@@ -171,7 +171,7 @@ export default function Products() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center md:justify-between gap-3">
         <h1 className="text-2xl font-semibold text-gray-800">Manage Categories & Products</h1>
 
         <button
@@ -187,13 +187,13 @@ export default function Products() {
       </div>
 
       {/* Table */}
-      <div className="bg-white shadow rounded-2xl overflow-hidden">
+      <div className="bg-white shadow rounded-2xl overflow-x-auto">
         {loading ? (
           <p className="p-6 text-gray-500">Loading...</p>
         ) : categories.length === 0 ? (
           <p className="p-6 text-gray-500">No categories found.</p>
         ) : (
-          <table className="min-w-full border-collapse">
+          <table className="min-w-[600px] w-full border-collapse">
             <thead className="bg-gray-100">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 border-b">ID</th>
