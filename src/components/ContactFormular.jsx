@@ -15,15 +15,15 @@ export default function ContactFormular() {
         </p>
 
         <p className="text-md font-[NeueHaasRoman]">Mobile:</p>
-        <p className="text-lg font-[SagaceMedium]">+91 12345 12345</p>
-        <p className="text-lg font-[SagaceMedium]">+91 12345 12345</p>
+        <p className="text-lg font-[SagaceMedium]">+91 9873039506</p>
+        <p className="text-lg font-[SagaceMedium]">+91 9818617506</p>
 
         <p className="text-md font-[NeueHaasRoman]">Email:</p>
-        <p className="text-lg font-[SagaceMedium]">hello@bansal.com</p>
+        <p className="text-lg font-[SagaceMedium]">bansaltimberplywood@gmail.com</p>
 
         <p className="text-md font-[NeueHaasRoman]">Address:</p>
         <p className="text-lg font-[SagaceMedium]">
-          Shop No. 897B, <br />Ward No. 6,Main Market, <br />Mehrauli, New Delhi - 110030
+          Shop No. 897B, <br />Ward No. 2, Main Market, <br/> Aam Bagh, Mehrauli Village, <br />Mehrauli, New Delhi - 110030
         </p>
       </div>
 

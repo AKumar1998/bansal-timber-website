@@ -1,25 +1,21 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 
 export default function ContactCarousel() {
   const [slides, setSlides] = useState([]);
   const [index, setIndex] = useState(1);
-  const [isTransitioning, setIsTransitioning] = useState(true);
   const intervalRef = useRef(null);
   const containerRef = useRef(null);
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
+  // Fetch images
   useEffect(() => {
     fetch("https://bansaltimber.com/api/contact-carousel/get_contact_carousel.php")
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-          // Ensure full URLs
-          const images = data.data.map(
-            (img) =>
-              img.startsWith("http")
-                ? img
-                : "https://bansaltimber.com" + img
+          const images = data.data.map((img) =>
+            img.startsWith("http") ? img : "https://bansaltimber.com" + img
           );
           setSlides(images);
           setIndex(1);
@@ -29,59 +25,63 @@ export default function ContactCarousel() {
   }, []);
 
   const total = slides.length;
-  const extendedSlides = total > 0 ? [slides[total - 1], ...slides, slides[0]] : [];
 
-  // Auto-slide
-  useEffect(() => {
-    if (total === 0) return;
+  // ✅ Stable extended slides
+  const extendedSlides = useMemo(() => {
+    return total > 0 ? [slides[total - 1], ...slides, slides[0]] : [];
+  }, [slides, total]);
+
+  // Auto slide (single source of truth)
+  const startInterval = useCallback(() => {
     clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
       setIndex((prev) => prev + 1);
-    }, 5000);
-    return () => clearInterval(intervalRef.current);
-  }, [total]);
+    }, 4000);
+  }, []);
 
-  // Smooth infinite loop using ref-based transition snapping
+  useEffect(() => {
+    if (total === 0) return;
+    startInterval();
+    return () => clearInterval(intervalRef.current);
+  }, [total, startInterval]);
+
+  // ✅ Transform + SAFE loop correction (NO transitionend)
   useEffect(() => {
     const container = containerRef.current;
     if (!container || total === 0) return;
 
-    container.style.transition = isTransitioning
-      ? "transform 0.7s ease-in-out"
-      : "none";
+    container.style.transition = "transform 0.6s ease-in-out";
     container.style.transform = `translateX(-${index * 100}%)`;
 
-    const handleTransitionEnd = () => {
+    const timeout = setTimeout(() => {
+      // Forward loop
       if (index === total + 1) {
-        // Snap to first real slide
-        setIsTransitioning(false);
+        container.style.transition = "none";
         setIndex(1);
-      } else if (index === 0) {
-        // Snap to last real slide
-        setIsTransitioning(false);
-        setIndex(total);
+        container.style.transform = `translateX(-100%)`;
       }
-    };
 
-    container.addEventListener("transitionend", handleTransitionEnd);
-    return () => container.removeEventListener("transitionend", handleTransitionEnd);
-  }, [index, total, isTransitioning]);
+      // Backward loop
+      if (index === 0) {
+        container.style.transition = "none";
+        setIndex(total);
+        container.style.transform = `translateX(-${total * 100}%)`;
+      }
+    }, 600); // match transition duration
 
-  // Re-enable transitions after snapping (1 frame later)
-  useEffect(() => {
-    if (!isTransitioning) {
-      const id = requestAnimationFrame(() => setIsTransitioning(true));
-      return () => cancelAnimationFrame(id);
-    }
-  }, [isTransitioning]);
+    return () => clearTimeout(timeout);
+  }, [index, total]);
 
-  // Swipe gesture
+  // Swipe
   const handleTouchStart = (e) => (touchStartX.current = e.touches[0].clientX);
   const handleTouchMove = (e) => (touchEndX.current = e.touches[0].clientX);
   const handleTouchEnd = () => {
     const diff = touchStartX.current - touchEndX.current;
-    if (diff > 50) setIndex((prev) => prev + 1);
-    else if (diff < -50) setIndex((prev) => prev - 1);
+
+    if (Math.abs(diff) > 50) {
+      setIndex((prev) => prev + (diff > 0 ? 1 : -1));
+      startInterval();
+    }
   };
 
   if (total === 0) {
@@ -107,7 +107,7 @@ export default function ContactCarousel() {
               src={slide}
               alt={`Slide ${i}`}
               className="w-full h-auto object-cover aspect-[16/9]"
-              loading="lazy"
+              loading="eager"
             />
           </div>
         ))}
@@ -118,7 +118,10 @@ export default function ContactCarousel() {
         {slides.map((_, i) => (
           <button
             key={i}
-            onClick={() => setIndex(i + 1)}
+            onClick={() => {
+              setIndex(i + 1);
+              startInterval();
+            }}
             className={`h-2 w-2 md:h-3 md:w-3 mb-2 md:mb-4 rounded-full transition-all duration-300 ${
               index === i + 1 ? "bg-white scale-125" : "bg-gray-400"
             }`}
@@ -128,4 +131,3 @@ export default function ContactCarousel() {
     </div>
   );
 }
-

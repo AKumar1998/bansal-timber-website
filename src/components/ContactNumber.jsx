@@ -25,8 +25,8 @@ export default function ContactNumber() {
       </div>
 
       {/* Call buttons */}
-      <RectangleButton text="+91 12345 12345" /> 
-      <RectangleButton text="+91 12345 12345" /> 
+      <RectangleButton text="+91 9873039506" /> 
+      <RectangleButton text="+91 9818617506" /> 
     </div>
   );
 }

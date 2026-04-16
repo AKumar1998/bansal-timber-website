@@ -1,5 +1,5 @@
 import SectionTitle from './SectionTitle.jsx';
-import journeyImage from '../assets/images/journey-logo.svg';
+import journeyImage from '../assets/images/journey-logo.png';
 import journeyPic from '../assets/images/journey-image1.jpg';
 import HomeProductsCTA from './HomeProductsCTA.jsx';
 import SimpleButton from './Buttons/SimpleButton.jsx';
