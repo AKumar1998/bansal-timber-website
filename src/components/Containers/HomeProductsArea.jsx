@@ -11,6 +11,8 @@ import trend from '../../assets/images/company-logos/trend-laminates.svg';
 import statSVG from '../../assets/images/home-products-banner-stats.svg';
 import productsBanner from '../../assets/images/home-products-banner.jpg';
 import ctaImage from '../../assets/images/home-view-products-banner.jpg';
+import micaImage from '../../assets/images/mica-image-home.jpg';
+import veneerImage from '../../assets/images/veneer-image-home.jpg';
 import SectionTitle from '../SectionTitle.jsx';
 import HomeProductsBanner from '../HomeProductsBanner.jsx';
 import HomeProductsGrid from '../HomeProductsGrid.jsx';
@@ -25,8 +27,8 @@ export default function HomeProductsArea() {
     
     {id:1, name: "Wooden Laminates", image: woodLaminates},
     {id:2, name: "Flush Doors", image: flushDoors},
-    {id:3, name: "Wooden Laminates", image: woodLaminates},
-    {id:4, name: "Wooden Laminates", image: woodLaminates},
+    {id:3, name: "Mica", image: micaImage},
+    {id:4, name: "Veneer", image: veneerImage},
  
   ];
   
