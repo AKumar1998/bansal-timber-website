@@ -59,76 +59,79 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-0 pt-4 md:pt-6 left-0 w-full z-50 transition-transform duration-500 ${
-          showNavbar ? "translate-y-0" : "-translate-y-full"
-        }`}
-      >
+  className={`fixed top-0 left-0 w-full px-4 sm:px-6 lg:px-8 pt-4 md:pt-6 z-50 transition-transform duration-500 ${
+    showNavbar ? "translate-y-0" : "-translate-y-full"
+  }`}
+>
         {/* Navbar */}
-        <nav
-          onMouseEnter={() => window.innerWidth >= 768 && setNavHovered(true)}
-          onMouseLeave={() => {
-            setNavHovered(false);
-            setLinkHovered(null);
-          }}
-          className={`relative flex items-center justify-between px-6 py-4 rounded-xl mx-4 md:mx-auto max-w-[87.5rem] transition-colors duration-300
-            ${isOpen ? "bg-white text-black" : navIsLight ? "bg-white text-black" : "bg-black text-white"}
-          `}
+<nav
+  onMouseEnter={() => window.innerWidth >= 768 && setNavHovered(true)}
+  onMouseLeave={() => {
+    setNavHovered(false);
+    setLinkHovered(null);
+  }}
+  className={`relative flex items-center justify-between px-6 py-4 rounded-xl w-full max-w-[87.5rem] mx-auto transition-colors duration-300
+    ${isOpen ? "bg-white text-black" : navIsLight ? "bg-white text-black" : "bg-black text-white"}
+  `}
+>
+  {/* Logo */}
+  <Link to="/" className="z-50">
+    <img
+      src={isOpen ? logoBlack : navIsLight ? logoBlack : logoWhite}
+      alt="Logo"
+      className="h-8 md:h-10 transition-transform duration-200"
+    />
+  </Link>
+
+  {/* Desktop Menu */}
+  <div className="hidden md:flex gap-6">
+    {navItems.map((item) => {
+      const isThisLinkHovered = linkHovered === item.name;
+      const iconSrc = isThisLinkHovered
+        ? item.iconWhite
+        : navIsLight
+        ? item.iconBlack
+        : item.iconWhite;
+
+      const textClass = isThisLinkHovered
+        ? "text-white"
+        : navIsLight
+        ? "text-black"
+        : "text-white";
+
+      const linkBg = isThisLinkHovered ? "bg-black" : "bg-transparent";
+
+      return (
+        <Link
+          key={item.name}
+          to={item.href}
+          onMouseEnter={() => setLinkHovered(item.name)}
+          onMouseLeave={() => setLinkHovered(null)}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-200 ${linkBg}`}
         >
-          {/* Logo */}
-          <Link to="/" className="z-50">
-            <img
-              src={isOpen ? logoBlack : navIsLight ? logoBlack : logoWhite}
-              alt="Logo"
-              className="h-8 md:h-10 transition-transform duration-200"
-            />
-          </Link>
+          <img src={iconSrc} alt={`${item.name} icon`} className="h-5 w-5" />
+          <span className={`${textClass} select-none`}>{item.name}</span>
+        </Link>
+      );
+    })}
+  </div>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex gap-6">
-            {navItems.map((item) => {
-              const isThisLinkHovered = linkHovered === item.name;
-              const iconSrc = isThisLinkHovered
-                ? item.iconWhite
-                : navIsLight
-                ? item.iconBlack
-                : item.iconWhite;
-              const textClass = isThisLinkHovered
-                ? "text-white"
-                : navIsLight
-                ? "text-black"
-                : "text-white";
-              const linkBg = isThisLinkHovered ? "bg-black" : "bg-transparent";
+  {/* Mobile Hamburger / Cross */}
+  <button
+    className={`md:hidden w-10 h-10 flex items-center justify-center rounded-lg transition ${
+      isOpen ? "bg-black" : "bg-white"
+    }`}
+    onClick={() => setIsOpen((s) => !s)}
+    aria-expanded={isOpen}
+  >
+    <img
+      src={isOpen ? crossWhite : hamburgerBlack}
+      alt="menu"
+      className="w-6 h-6"
+    />
+  </button>
+</nav>
 
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  onMouseEnter={() => setLinkHovered(item.name)}
-                  onMouseLeave={() => setLinkHovered(null)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-200 ${linkBg}`}
-                >
-                  <img src={iconSrc} alt={`${item.name} icon`} className="h-5 w-5" />
-                  <span className={`${textClass} select-none`}>{item.name}</span>
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Mobile Hamburger / Cross */}
-          <button
-            className={`md:hidden w-10 h-10 flex items-center justify-center rounded-lg transition ${
-              isOpen ? "bg-black" : "bg-white"
-            }`}
-            onClick={() => setIsOpen((s) => !s)}
-            aria-expanded={isOpen}
-          >
-            <img
-              src={isOpen ? crossWhite : hamburgerBlack}
-              alt="menu"
-              className="w-6 h-6"
-            />
-          </button>
-        </nav>
       </header>
 
       {/* Mobile Menu (full overlay) */}

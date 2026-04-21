@@ -15,13 +15,16 @@ export default function HeroMain() {
 
   return (
     <div
-      className="relative w-screen h-screen flex items-center justify-center bg-center bg-cover"
+      className="relative w-screen h-screen bg-center bg-cover flex items-start justify-center"
       style={{ backgroundImage: `url(${hero.image_url})` }}
     >
-      <h1 className="z-10 text-white text-3xl sm:text-5xl font-[SagaceMedium] -translate-y-50 sm:-translate-y-60 font-bold text-center">
-        {hero.title_text}
-      </h1>
+
+      {/* Text Container */}
+      <div className="relative z-10 mt-45 sm:mt-40 px-4">
+        <h1 className="text-white text-3xl sm:text-5xl lg:text-6xl font-[SagaceMedium] font-bold text-center max-w-[20ch] leading-tight mx-auto">
+          {hero.title_text}
+        </h1>
+      </div>
     </div>
   );
 }
-

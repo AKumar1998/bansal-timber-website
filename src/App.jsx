@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import React, { Suspense, lazy } from "react";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 
 // --- Frontend Imports ---
 import Home from "./pages/Home.jsx";
@@ -15,20 +16,22 @@ const AdminApp = lazy(() => import("./admin/AdminApp.jsx"));
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
+
       <Suspense fallback={<div>Loading...</div>}>
         <Routes>
-          //Frontend Routes
+          {/* Frontend Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/blogs/:slug" element={<BlogPage />} />
           <Route path="/contactus" element={<ContactUs />} />
-          //Admin Panel Route
+
+          {/* Admin Panel Route */}
           <Route path="/admin/*" element={<AdminApp />} />
         </Routes>
       </Suspense>
     </Router>
   );
 }
-
